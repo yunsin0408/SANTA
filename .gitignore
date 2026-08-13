@@ -1,0 +1,22 @@
+/data/
+/runs/
+/OpenMatch/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Checkpoints / logs / misc large artifacts
+*.pt
+*.bin
+*.pkl
+*.pickle
+wandb/
+*.log
+
+# Editor / OS
+.vscode/
+.DS_Store
