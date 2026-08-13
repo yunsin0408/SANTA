@@ -1,11 +1,18 @@
-export OUTPUT_PATH=/data1/lixinze/Adv/test/
-export MODEL_PATH=/data1/lixinze/Adv/pretrain-checkpoint/cl-identity/best
-export DOC_PATH=/data1/lixinze/Adv/test/adv_test_doc.jsonl
-export QUERY_PATH=/data1/lixinze/Adv/test/adv_test_query.jsonl
-export TREC_PATH=/data1/lixinze/Adv/test/adv_inference.trec
+#!/bin/bash
+set -e
+# Usage: bash index-code.sh <language>
+export language=$1
+
+export DATA_ROOT=/workspace/SANTA_v2/data
+export TEST_PATH=${DATA_ROOT}/processed/code/${language}/test
+export OUTPUT_PATH=${TEST_PATH}/
+export MODEL_PATH=/workspace/SANTA_v2/runs/code/${language}/finetune/checkpoints/best_dev
+export DOC_PATH=${TEST_PATH}/${language}_test_doc.jsonl
+export QUERY_PATH=${TEST_PATH}/${language}_test_query.jsonl
+export TREC_PATH=${TEST_PATH}/${language}_inference.trec
 
 # OUTPUT_PATH is the path where code embeddings are saved.
-# MODEL_PATH checkpint
+# MODEL_PATH checkpoint
 # DOC_PATH is the processed test data
 
 cd ../OpenMatch/src
@@ -27,5 +34,3 @@ python -m openmatch.driver.retrieve  \
     --query_template "<query>"  \
     --q_max_len 50  \
     --trec_save_path ${TREC_PATH}
-
-

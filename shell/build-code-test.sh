@@ -1,23 +1,36 @@
-export TEST_PATH=/data1/lixinze/Adv
-export test_data=test.jsonl
+#!/bin/bash
+set -e
+# Usage: bash build-code-test.sh <language>
+# python evaluates on AdvTest (query+doc from the same paired test.jsonl); the
+# other 5 languages evaluate on CodeSearch, where the query set (test.jsonl) has
+# code stripped and the doc/codebase set (codebase.jsonl) has docstrings stripped.
+export language=$1
 
-# TEST_PATH is the path where the raw test data is located.
+export DATA_ROOT=/workspace/SANTA_v2/data
+if [ "${language}" = "python" ]; then
+  export QUERY_INPUT=${DATA_ROOT}/AdvTest/test.jsonl
+  export DOC_INPUT=${DATA_ROOT}/AdvTest/test.jsonl
+else
+  export QUERY_INPUT=${DATA_ROOT}/CSN_CodeSearch/CSN/dataset/${language}/test.jsonl
+  export DOC_INPUT=${DATA_ROOT}/CSN_CodeSearch/CSN/dataset/${language}/codebase.jsonl
+fi
 
-export OUTPUT_PATH=/data1/lixinze/Adv/test
-export output_query=adv_test_query.jsonl
-export output_doc=adv_test_doc.jsonl
+export OUTPUT_PATH=${DATA_ROOT}/processed/code/${language}/test
+export output_query=${language}_test_query.jsonl
+export output_doc=${language}_test_doc.jsonl
 
 # OUTPUT_PATH is the path where the processed test data is saved.
 # data_type chooses whether to process the query or code.
 
+mkdir -p ${OUTPUT_PATH}
+
 cd ../evaluate_code
 python build_test_code.py \
-     --input ${TEST_PATH}/${test_data}  \
+     --input ${QUERY_INPUT}  \
      --output ${OUTPUT_PATH}/${output_query}  \
      --data_type query  \
 
 python build_test_code.py \
-     --input ${TEST_PATH}/${test_data}  \
+     --input ${DOC_INPUT}  \
      --output ${OUTPUT_PATH}/${output_doc}  \
      --data_type doc  \
-

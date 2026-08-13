@@ -1,7 +1,8 @@
-export FINETUNE_PATH=/data1/lixinze/shop/finetune-data
+export FINETUNE_PATH=/workspace/SANTA_v2/data/processed/product/finetune
 export finetune_eval_data=product_eval.jsonl
-export CHECK_POINT=/data1/lixinze/shop/finetune-checkpoint/hard-neg/top-100/t5-shop-1e-5_60
-# CHECK_POINT is the directory which includes checkponits
+export RUN_TAG=${RUN_TAG:-}
+export CHECK_POINT=/workspace/SANTA_v2/runs/product/finetune${RUN_TAG}/checkpoints
+# CHECK_POINT is the directory which includes checkpoints
 # batch_size is must 1
 cd ../product_best_dev
 python evaluate_shop_finetune.py \

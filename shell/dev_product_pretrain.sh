@@ -1,7 +1,8 @@
-export PRETRAIN_PATH=/data1/lixinze/shop/pretrain-data-identity
+export PRETRAIN_PATH=/workspace/SANTA_v2/data/processed/product/pretrain
 export pretrain_eval_data=product_eval.jsonl
-export CHECK_POINT=/data1/lixinze/shop/finetune-checkpoint/hard-neg/top-100/t5-shop-1e-5_60
-# CHECK_POINT is the directory which includes checkponits
+export RUN_TAG=${RUN_TAG:-}
+export CHECK_POINT=/workspace/SANTA_v2/runs/product/pretrain${RUN_TAG}/checkpoints
+# CHECK_POINT is the directory which includes checkpoints
 
 cd ../product_best_dev
 python evaluate_shop_pretrain.py \
