@@ -168,7 +168,7 @@ def test(opt,model,tokenizer,dataset,collator,best_dev_ndcg,checkpoint_path,chec
         print(ndcg_100)
         if ndcg_100 > best_dev_ndcg:
             best_dev_ndcg = ndcg_100
-            best_path = checkpoint_path + "best_dev"
+            best_path = os.path.join(checkpoint_path, "best_dev")
             shutil.copytree(check_path, best_path, dirs_exist_ok=True)
         writer.add_scalar('eval/ndcg', ndcg_100, opt.eval_step * number)
         return best_dev_ndcg

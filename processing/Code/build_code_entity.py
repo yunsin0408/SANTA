@@ -6,9 +6,26 @@ from io import BytesIO
 from argparse import ArgumentParser
 from tqdm import tqdm
 import random
-import tree_sitter
+from tree_sitter import Language, Parser
+import tree_sitter_javascript
+import tree_sitter_php
+import tree_sitter_go
+import tree_sitter_java
+import tree_sitter_ruby
 import os
 import sys
+
+# Maps CodeSearchNet's `code_type` to the matching tree-sitter grammar.
+# The old workflow loaded every grammar from one merged `tree-sitter-languages.so`
+# built against a pre-0.20 tree-sitter ABI; that .so is incompatible with current
+# tree-sitter bindings, so grammars are now loaded from their individual packages.
+LANGUAGE_GETTERS = {
+    'javascript': tree_sitter_javascript.language,
+    'php': tree_sitter_php.language_php,
+    'go': tree_sitter_go.language,
+    'java': tree_sitter_java.language,
+    'ruby': tree_sitter_ruby.language,
+}
 php_keylist=[ #php key words.
   "abstract",
   "and",
@@ -192,7 +209,7 @@ def get_identifier_names(parser,code):
     return identifier_names
 def main():
 
-    parser = ArgumentP
+    parser = ArgumentParser()
 
     parser.add_argument('--input', type=str, default=None)
     parser.add_argument('--output', type=str, default=None)
@@ -210,9 +227,8 @@ def main():
     sys.setrecursionlimit(3000)
 
     if args.code_type !='python':
-        lang = tree_sitter.Language(args.tree, args.code_type)
-        parser = tree_sitter.Parser()
-        parser.set_language(lang)
+        lang = Language(LANGUAGE_GETTERS[args.code_type]())
+        parser = Parser(lang)
 
     with open(args.output, 'w') as f:
 

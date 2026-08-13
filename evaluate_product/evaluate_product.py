@@ -57,6 +57,11 @@ def generate_product_result(args,df_hypothesis):
     l_ranking_postion = []
     l_score = []
     for (query_id, rows) in df_results_product_id:
+        # pandas>=2.2 groupby(by=[single_col]) yields a 1-tuple key during
+        # iteration where older pandas yielded the bare scalar; unwrap it so the
+        # written query_id matches test.qrels's plain (non-tuple) query_id.
+        if isinstance(query_id, tuple):
+            query_id = query_id[0]
         n = len(rows)
         l_query_id += [query_id for _ in range(n)]
         l_product_id += rows[col_product_id].to_list()
@@ -121,8 +126,10 @@ def main():
 
     # 之后要对query_id排序，而open-match中得到的id为str类型，必须要转换成int类型。
     query_id = list(map(int, query_id))
-    # query dot product
-    score = torch.diagonal(torch.mm(query_vec, doc_vec.transpose(0, 1)).to('cpu')).tolist()
+    # paired (row-aligned) dot product -- computing the full NxN matrix just to
+    # take its diagonal (the original approach) is O(n^2) and, at this dataset's
+    # size, a ~120GB intermediate; this is O(n) and exact.
+    score = (query_vec * doc_vec).sum(-1).tolist()
 
     logger.info("***** prepare data *****")
     df_examples_products = load_product_data(args, version=1, split='test')

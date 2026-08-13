@@ -34,6 +34,11 @@ class DROutput(ModelOutput):
 
 
 class SModel(nn.Module):
+    # HF Trainer's checkpoint-resume path (_load_from_checkpoint) assumes self.model
+    # is a transformers PreTrainedModel and reads this attribute unconditionally;
+    # SModel is a plain nn.Module wrapper, so it needs a stand-in.
+    _keys_to_ignore_on_save = None
+
     def __init__(
             self,
             lm_q: PreTrainedModel,

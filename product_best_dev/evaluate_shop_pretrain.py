@@ -1,3 +1,4 @@
+import os
 import torch
 import numpy as np
 import argparse
@@ -134,7 +135,7 @@ def test(opt,model,tokenizer,dataset,collator,best_dev_mrr,checkpoint_path,check
         print(eval_mrr)
         if eval_mrr>best_dev_mrr:
             best_dev_mrr=eval_mrr
-            best_path=checkpoint_path+"best_dev"
+            best_path=os.path.join(checkpoint_path, "best_dev")
             shutil.copytree(check_path, best_path,dirs_exist_ok=True)
         writer.add_scalar('eval/mrr', eval_mrr, 4000*eval_step)
 

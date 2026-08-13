@@ -9,7 +9,7 @@ import json
 import numpy as np
 from torch.nn import CrossEntropyLoss, MSELoss
 from torch.utils.data import DataLoader, Dataset, SequentialSampler, RandomSampler, TensorDataset
-from transformers import (WEIGHTS_NAME, AdamW, get_linear_schedule_with_warmup,
+from transformers import (WEIGHTS_NAME, get_linear_schedule_with_warmup,
                           RobertaConfig, RobertaModel, RobertaTokenizer,T5ForConditionalGeneration)
 from tqdm import tqdm
 import glob
@@ -217,7 +217,7 @@ def evaluate(args, model, tokenizer, file_name,check_path,writer, best_dev_mrr,n
     print(eval_mrr)
     if eval_mrr > best_dev_mrr:
         best_dev_mrr = eval_mrr
-        best_path = args.model_name_or_path + "best_dev"
+        best_path = os.path.join(args.model_name_or_path, "best_dev")
         shutil.copytree(check_path, best_path, dirs_exist_ok=True)
     writer.add_scalar('eval/mrr', eval_mrr, 3000 * number)
 
