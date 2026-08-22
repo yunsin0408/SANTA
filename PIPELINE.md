@@ -15,10 +15,7 @@
    and Python 3.12+ for compatibility with the rest of the list.
 
    The `.venv` must be **activated in every new shell/terminal** before running
-   any `shell/*.sh` script — they all invoke a bare `python` (not `python3`),
-   which only resolves once the venv is active. Ubuntu 24.04 ships no `python`
-   binary at all, only `python3`, so forgetting this step fails with `python:
-   command not found`.
+   any `shell/*.sh` script.
 
 2. **OpenMatch. (DONE)** `shell/index-code.sh`, `shell/index-code-hardneg.sh`, and
    `shell/zeroshot-eval-code.sh` all do `cd ../OpenMatch/src` and run
@@ -76,7 +73,8 @@
 All commands below run from inside `shell/` (each script `cd`s to its target
 directory relative to there). Code-track scripts take a language argument
 (`ruby`, `python`, `javascript`, `go`, `java`, `php`); product-track scripts
-take no argument.
+take no argument. All scripts are executable, so `./script.sh <args>` and
+`bash script.sh <args>` both work.
 
 One useful env var, settable before any script in either track:
 - `RUN_TAG` — suffix appended to run directories (e.g. `RUN_TAG=-v2`) so an
