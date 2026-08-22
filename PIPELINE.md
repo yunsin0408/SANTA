@@ -3,7 +3,9 @@
 
 1. **Python environment. (DONE)** 
    ```
-   python3 -m venv .venv && source .venv/bin/activate && pip install --upgrade pip
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install --upgrade pip
    pip install transformers==4.35.2 nltk==3.7 "numpy>=1.26.4" "datasets>=2.4.0" \
        "tree-sitter>=0.20.4" tree-sitter-javascript tree-sitter-php tree-sitter-go \
        tree-sitter-java tree-sitter-ruby "faiss-cpu>=1.7.4" "scikit-learn>=1.1.2" \
@@ -11,6 +13,12 @@
    ```
    (This repo has no dependency changes vs. upstream) Needs CUDA-enabled `torch`
    and Python 3.12+ for compatibility with the rest of the list.
+
+   The `.venv` must be **activated in every new shell/terminal** before running
+   any `shell/*.sh` script — they all invoke a bare `python` (not `python3`),
+   which only resolves once the venv is active. Ubuntu 24.04 ships no `python`
+   binary at all, only `python3`, so forgetting this step fails with `python:
+   command not found`.
 
 2. **OpenMatch. (DONE)** `shell/index-code.sh`, `shell/index-code-hardneg.sh`, and
    `shell/zeroshot-eval-code.sh` all do `cd ../OpenMatch/src` and run
