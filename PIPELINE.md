@@ -1,7 +1,7 @@
 
 ## First-time setup
 
-1. **Python environment. (DONE)** 
+1. **Python environment** 
    ```
    python3 -m venv .venv
    source .venv/bin/activate
@@ -17,16 +17,23 @@
    The `.venv` must be **activated in every new shell/terminal** before running
    any `shell/*.sh` script.
 
-2. **OpenMatch. (DONE)** `shell/index-code.sh`, `shell/index-code-hardneg.sh`, and
+2. **OpenMatch** `shell/index-code.sh`, `shell/index-code-hardneg.sh`, and
    `shell/zeroshot-eval-code.sh` all do `cd ../OpenMatch/src` and run
    `python -m openmatch.driver.{build_index,retrieve}`, so they expect an
    `OpenMatch/` checkout as a sibling of `shell/` *inside this repo* (a
    relative `cd`, so it can't point outside `SANTA_v2/`):
    ```
    git clone https://github.com/OpenMatch/OpenMatch.git /workspace/SANTA_v2/OpenMatch
+   cd /workspace/SANTA_v2/OpenMatch && pip install -e . && cd -
    ```
+   `pip install -e .` because OpenMatch ships a
+   `pyproject.toml`/`setup.py` with its own deps (`datasets`, `sentencepiece`,
+   `transformers`) — editable install resolves those without copying the
+   package into site-packages, so the on-disk checkout above still satisfies
+   the scripts' `cd ../OpenMatch/src`. A plain `pip install git+https://...`
+   with no local clone would skip that checkout and break the `cd`.
 
-3. **Data. (DONE)** From
+3. **Data** From
    `README.md`'s "Data Download" section:
    ```
    # Code: CodeSearchNet

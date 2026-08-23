@@ -16,11 +16,21 @@ pandas==1.5.0
 pytrec-eval==0.5
 tensorboard
 ```
-(2) install openmatch. To download OpenMatch as a library and obtain openmatch-thunlp-0.0.1.
+(2) install openmatch.
+
+If you only need `import openmatch` from another project, install it straight
+from GitHub as a library:
+```
+pip install git+https://github.com/OpenMatch/OpenMatch.git
+```
+
+For running the scripts in this repo, use a local development install
+instead — the evaluation scripts below `cd` into the OpenMatch checkout
+itself, so it needs to exist on disk, not just be importable:
 ```
 git clone https://github.com/OpenMatch/OpenMatch.git
 cd OpenMatch
-pip install .
+pip install -e .
 ```
 
 ## Pretrained Checkpoint
@@ -169,9 +179,11 @@ bash dev_product_finetune.sh
 
 ## Evaluating
 
-Before evaluating the code and product retrieval tasks, it is necessary to download `OpenMatch`.
+Before evaluating the code and product retrieval tasks, it is necessary to download `OpenMatch` (see the local development install under [Environment](#environment) — a plain `pip install` from GitHub is not enough here, since these scripts `cd` into the checkout).
 ```
 git clone https://github.com/OpenMatch/OpenMatch.git
+cd OpenMatch
+pip install -e .
 ```
 
 #### Evaluating Code Retrieval
