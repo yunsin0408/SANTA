@@ -10,7 +10,7 @@ L=runs/xml/${TAG}_logs; mkdir -p $L; R=$RESULTS_ROOT/$TAG
 export EXTRA_TRAIN_ARGS="--gradient_accumulation_steps 1 --logging_steps 1 --evaluation_strategy steps --eval_steps 5 --report_to none --seed $SEED $EXTRA"
 for name in "$@"; do
   n=${TAG}_$name; mkdir -p $R/$name
-  export MODEL_NAME=$name RUN_TAG=/$TAG/$name CUDA_VISIBLE_DEVICES=$GPU DATA_DIR=$SANTA/$DATA_ROOT/$name
+  export MODEL_NAME=$name RUN_TAG=/$TAG/$name CUDA_VISIBLE_DEVICES=$GPU DATA_DIR=$SANTA/data/xml/tokenized/$DATA_ROOT/$name
   echo "[$(date +%T)] START $n" >> $L/progress.log
   bash shell/pretrain-xml.sh                                                        > $L/$n.pretrain.log 2>&1 || { echo "FAIL pretrain $n" >> $L/progress.log; continue; }
   RESULTS_PATH=$R/$name/best_dev_pretrain.json bash shell/dev_xml_pretrain.sh  > $L/$n.bdp.log 2>&1 || { echo "FAIL bdp $n" >> $L/progress.log; continue; }
