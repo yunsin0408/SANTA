@@ -5,12 +5,12 @@ The cached embeddings.npz hold raw encoder reps; they are mapped into the ball e
 (x * poincare_scale, then tanh(|x|) x/|x|). Distances are the model's own score (poincare_scores, curvature -1).
 
 Figures (results/figures/):
-  fig19_poincare_disk_{original,anonymized}.png
+  fig_poincare_disk_{original,anonymized}.png
       one Poincare disk per arm. 2-D layout by hyperbolic MDS: points are optimized inside the 2-D disk so their
       pairwise Poincare distances match the true 768-d ones (stress in each title; lower = more faithful).
       Colour = source corpus, circle = test document, triangle = query, grey segment = query -> gold document.
       Faint rings mark hyperbolic distance 1, 2, 3 from the origin.
-  fig23_poincare_ball_3d.png
+  fig_poincare_ball_3d.png
       plain-language figure for non-technical readers: finetuneB_only vs pretrainA_finetuneB (same finetuning
       data, with / without SDA+MEP pretraining), original queries. Hyperbolic MDS into a 3-D ball, drawn as a
       shaded sphere with depth cues; a line joins each question to its document only when that document is the
@@ -147,7 +147,7 @@ def fig_disks(version, seed):
     fig.text(0.01, -0.01, "2-D hyperbolic MDS of the 768-d Poincaré distances; rings = hyperbolic distance 1, 2, 3 "
              "from the origin; stress = Kruskal stress-1 of the 2-D layout.", fontsize=7.5, color=INK2)
     fig.tight_layout()
-    path = OUT / f"fig19_poincare_disk_{version}.png"
+    path = OUT / f"fig_poincare_disk_{version}.png"
     fig.savefig(path)
     plt.close(fig)
     print("wrote", path)
@@ -222,7 +222,7 @@ def fig_ball_3d(seed, version="original"):
              "approximated inside a 3-D ball, so distances are approximate; which pairs are matched uses the "
              "exact distances.", ha="center", fontsize=7.5, color=INK2)
     fig.tight_layout()
-    path = OUT / "fig23_poincare_ball_3d.png"
+    path = OUT / "fig_poincare_ball_3d.png"
     fig.savefig(path)
     plt.close(fig)
     print("wrote", path)
