@@ -1,0 +1,18 @@
+torch==2.13.0
+transformers==4.35.2
+datasets==5.0.1
+accelerate==0.25.0
+sentencepiece==0.2.2
+pillow==12.3.0
+faiss-cpu==1.15.0
+matplotlib==3.11.2
+scikit-learn==1.9.1
+git+https://github.com/OpenMatch/OpenMatch.git@8330192a607ecd66610bb82b6c8e408600def9a8
+# viz/
+openpyxl
+# demo/
+fastapi
+uvicorn
+# processing/XML/datasets/ 
+anthropic
+python-dotenv

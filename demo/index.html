@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S1000D 技術文件語意檢索</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+
+:root {
+  --bg: #ffffff; --surface: #f7f8fa; --ink: #1a1f29; --ink2: #5a6270; --rule: #e3e6eb; --rule2: #cfd4dc;
+  --accent: #1f3a68; --accent-soft: #eef2f8; --ok: #1e6b3f; --ok-soft: #eaf4ee; --warn: #8a5300; --warn-soft: #fbf3e4;
+  --err: #a8261c;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --sans: "IBM Plex Sans", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.7 var(--sans); }
+.wrap { max-width: 1160px; margin: 0 auto; padding-inline: 20px; }
+header.site { border-top: 4px solid var(--accent); border-bottom: 1px solid var(--rule); }
+header.site .wrap { padding-block: 26px 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12.5px; font-weight: 500; letter-spacing: .08em; color: var(--accent); margin: 0; }
+h1 { font-size: clamp(1.5rem, 2.8vw, 1.95rem); line-height: 1.3; font-weight: 700; margin: 0; letter-spacing: .01em; text-wrap: balance; }
+.sub { margin: 0; color: var(--ink2); max-width: 72ch; }
+nav.toc { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 13.5px; margin-top: 6px; }
+nav.toc a { color: var(--accent); text-decoration: none; }
+nav.toc a:hover { text-decoration: underline; }
+main .wrap { padding-block: 28px 12px; display: grid; gap: 40px; }
+h2 { font-size: 1.08rem; font-weight: 700; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
+.cols { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+@media (max-width: 880px) { .cols { grid-template-columns: 1fr; } }
+.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; min-width: 0; }
+label { display: block; font-weight: 600; margin-bottom: 6px; }
+textarea { width: 100%; min-height: 128px; resize: vertical; font: 15px/1.6 var(--sans); color: var(--ink); background: var(--bg);
+  border: 1px solid var(--rule2); border-radius: 4px; padding: 10px 12px; }
+textarea:focus, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.help { font-size: 13.5px; color: var(--ink2); margin: 8px 0 0; }
+.actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+button.primary { font: 600 15px var(--sans); color: #fff; background: var(--accent); border: 0; border-radius: 4px; padding: 9px 26px; cursor: pointer; }
+button.primary:hover { background: #172d52; }
+button.primary:disabled { opacity: .6; cursor: progress; }
+button.ghost { font: 500 13px var(--sans); color: var(--accent); background: var(--bg); border: 1px solid var(--rule2); border-radius: 4px; padding: 5px 12px; cursor: pointer; }
+button.ghost[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 10px; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 26px 1fr; gap: 10px; font-size: 14px; }
+ol.steps li::before { content: counter(s); width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent);
+  font-size: 12.5px; font-weight: 600; display: grid; place-items: center; margin-top: 1px; }
+ol.steps b { font-weight: 600; }
+.exs { display: grid; border: 1px solid var(--rule); border-radius: 4px; max-height: 430px; overflow-y: auto; }
+.ex { text-align: left; font: 13.5px/1.55 var(--sans); color: var(--ink); background: var(--bg); border: 0; border-bottom: 1px solid var(--rule);
+  padding: 10px 12px; cursor: pointer; display: grid; gap: 2px; }
+.ex:last-child { border-bottom: 0; }
+.ex:hover { background: var(--accent-soft); }
+.ex small { font-size: 12px; color: var(--accent); font-weight: 500; }
+.ex .txt { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--ink2); }
+.notice { border-left: 3px solid; padding: 8px 12px; font-size: 14px; margin: 0 0 12px; }
+.notice.warn { border-color: var(--warn); background: var(--warn-soft); color: var(--warn); }
+.notice.ok { border-color: var(--ok); background: var(--ok-soft); color: var(--ok); }
+.notice.err { border-color: var(--err); color: var(--err); }
+.empty { color: var(--ink2); font-size: 14px; border: 1px dashed var(--rule2); border-radius: 4px; padding: 22px; text-align: center; margin: 0; }
+.rtable { border-top: 1px solid var(--rule2); }
+.rhead, .rrow { display: grid; grid-template-columns: 3.2em minmax(0, 1fr) 6.5em; gap: 14px; align-items: baseline; padding: 10px 6px; }
+.rhead { font-size: 12.5px; color: var(--ink2); font-weight: 500; border-bottom: 1px solid var(--rule2); padding-block: 6px; }
+.rhead span:last-child, .dist { text-align: right; }
+.res { border-bottom: 1px solid var(--rule); }
+.res.expected { background: var(--ok-soft); }
+.rrow { width: 100%; background: none; border: 0; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.rrow:hover { background: var(--surface); }
+.res.expected .rrow:hover { background: transparent; }
+.rank { font-weight: 600; color: var(--ink2); font-variant-numeric: tabular-nums; text-align: center; }
+.t { font-weight: 600; overflow-wrap: anywhere; }
+.meta { font-size: 12.5px; color: var(--ink2); display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 2px; }
+.meta code { font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
+.dist { font-family: var(--mono); font-size: 13px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.badge, .tag { display: inline-block; font-size: 11.5px; line-height: 1.6; border-radius: 3px; padding: 0 6px; margin-left: 8px; vertical-align: 1px; font-weight: 500; }
+.badge { color: #fff; background: var(--ok); }
+.tag { color: var(--ink2); border: 1px solid var(--rule2); }
+.xml { margin: 0 6px 12px 3.6em; max-height: 420px; overflow: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px;
+  padding: 10px 12px; font: 12px/1.5 var(--mono); white-space: pre; }
+.note { font-size: 12.5px; color: var(--ink2); margin: 8px 0 0; }
+.intro { margin: 0 0 14px; max-width: 80ch; }
+.balls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+@media (max-width: 880px) { .balls { grid-template-columns: 1fr; } }
+.panel { margin: 0; min-width: 0; display: grid; gap: 8px; }
+figcaption { display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline; }
+figcaption b { font-weight: 700; }
+figcaption span { font-size: 13px; color: var(--ink2); }
+.plotbox { position: relative; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg); min-width: 0; }
+.ball { width: 100%; aspect-ratio: 1 / 1; max-width: 100%; }
+.reset { position: absolute; top: 10px; right: 10px; z-index: 2; }
+.cap { font-size: 13px; color: var(--ink2); margin: 0; }
+.legendrow { display: flex; flex-wrap: wrap; gap: 10px 48px; margin-top: 16px; }
+.legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13.5px; }
+.legend li { display: flex; align-items: center; gap: 10px; }
+.sw { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.sw.q { border-radius: 0; transform: rotate(45deg); width: 10px; height: 10px; background: var(--ink); }
+.sw.ring { background: transparent; border: 2px solid var(--ink); }
+.sw.ln { width: 18px; height: 2px; border-radius: 0; background: var(--ink2); }
+.sw.ln.dash { background: repeating-linear-gradient(90deg, var(--ink2) 0 4px, transparent 4px 7px); margin-left: 8px; }
+.about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; }
+@media (max-width: 880px) { .about { grid-template-columns: 1fr; } }
+dl.spec { margin: 0; display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: 8px 16px; font-size: 14px; }
+dl.spec dt { color: var(--ink2); }
+dl.spec dd { margin: 0; }
+.tablebox { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 7px 10px; border-bottom: 1px solid var(--rule); text-align: left; }
+th { font-weight: 500; color: var(--ink2); font-size: 12.5px; border-bottom-color: var(--rule2); }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+tfoot td { font-weight: 600; border-bottom: 0; border-top: 1px solid var(--rule2); }
+footer.site { border-top: 1px solid var(--rule); margin-top: 28px; }
+footer.site .wrap { padding-block: 18px 30px; font-size: 12.5px; color: var(--ink2); display: grid; gap: 4px; }
+footer.site p { margin: 0; }
+@media (max-width: 560px) {
+  .rhead { display: none; }
+  .rrow { grid-template-columns: 2.4em minmax(0, 1fr); }
+  .dist { grid-column: 2; text-align: left; }
+  .xml { margin-left: 6px; }
+  dl.spec { grid-template-columns: 1fr; gap: 0 0; }
+  dl.spec dd { margin-bottom: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <h1>S1000D 技術文件語意檢索</h1>
+    <p class="sub">本系統以自然語言查詢 S1000D XML 技術文件。檢索模型採用結構感知預訓練（SANTA）之編碼器，並於雙曲（Poincaré）空間中計算查詢與文件之相似度。</p>
+    <nav class="toc" aria-label="頁面導覽"><a href="#h-search">查詢與結果</a><a href="#h-space">嵌入空間視覺化</a><a href="#h-about">系統說明</a></nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="cols">
+      <div class="stack">
+        <section aria-labelledby="h-search">
+          <h2 id="h-search">查詢</h2>
+          <form id="searchForm">
+            <label for="q">查詢描述（請以英文撰寫）</label>
+            <textarea id="q" placeholder="例：A procedure describing how to remove and install the rear wheel of a bicycle, including the required tools and safety precautions."></textarea>
+            <p class="help">請以一至兩句英文說明目標文件之類型與主要內容，例如文件用途、涉及之系統或程序。模型僅讀取查詢之前 50 個 token（約 35 個英文字），建議將關鍵資訊置於句首；僅輸入關鍵字之檢索效果有限。</p>
+            <div class="actions"><button class="primary" id="go" type="submit">檢索</button></div>
+          </form>
+        </section>
+        <section aria-labelledby="h-results">
+          <h2 id="h-results">檢索結果</h2>
+          <div id="out" aria-live="polite"><p class="empty">輸入查詢描述或點選右側範例後，結果將顯示於此。</p></div>
+        </section>
+      </div>
+
+      <aside class="stack">
+        <section aria-labelledby="h-steps">
+          <h2 id="h-steps">使用說明</h2>
+          <ol class="steps">
+            <li><span><b>輸入查詢：</b>於左側欄位以英文描述欲查找之文件，或點選下方範例查詢。</span></li>
+            <li><span><b>執行檢索：</b>按「檢索」（或 Ctrl／⌘ + Enter），系統將依相似度列出前 10 筆文件。</span></li>
+            <li><span><b>檢視結果：</b>點選任一結果可展開該文件之 XML 原文；距離數值越小表示越相符。</span></li>
+            <li><span><b>檢視嵌入空間：</b>於下方 3D 視覺化比對固定範例與目前查詢於 Poincaré 球中之位置。</span></li>
+          </ol>
+        </section>
+        <section aria-labelledby="h-ex">
+          <h2 id="h-ex">範例查詢</h2>
+          <p class="help" style="margin:0 0 10px">以下為示範案例，查詢與對應文件均取自測試集（未參與模型訓練），多數之對應文件排名第 1，部分排名於前 10 內。點選後將自動執行檢索，並於結果中以<span class="badge" style="margin-left:4px">對應文件</span>標示。範例經挑選，整體表現請參閱下方<a href="#h-about">系統說明</a>之評估結果。</p>
+          <div class="exs" id="exs"><p class="empty" style="border:0">載入中…</p></div>
+        </section>
+      </aside>
+    </div>
+
+    <section aria-labelledby="h-space">
+      <h2 id="h-space">嵌入空間視覺化</h2>
+      <p class="intro">每個點代表一份文件於模型嵌入空間（Poincaré 球）中之位置，位置越接近表示模型判斷其內容越相似。拖曳可旋轉、縮放，游標移至點上可檢視詳細資訊。</p>
+      <div class="balls">
+        <figure class="panel">
+          <figcaption><b>範例</b><span>12 筆示範查詢及其對應文件</span></figcaption>
+          <div class="plotbox">
+            <button class="ghost reset" type="button" data-plot="ballEx">重設視角</button>
+            <div id="ballEx" class="ball" role="img" aria-label="範例查詢與其對應文件於 Poincaré 球中之位置"></div>
+          </div>
+          <p class="cap" id="exSummary"></p>
+        </figure>
+        <figure class="panel">
+          <figcaption><b>目前檢索</b><span>最近一次檢索之查詢位置與前 10 筆結果</span></figcaption>
+          <div class="plotbox">
+            <button class="ghost reset" type="button" data-plot="ballQ">重設視角</button>
+            <div id="ballQ" class="ball" role="img" aria-label="目前查詢與前 10 筆結果於 Poincaré 球中之位置"></div>
+          </div>
+          <p class="cap" id="qSummary">尚未執行檢索；檢索後將於此顯示查詢位置。</p>
+        </figure>
+      </div>
+      <div class="legendrow">
+        <ul class="legend" id="legend"></ul>
+        <ul class="legend">
+          <li><span class="sw" style="background:#c9ced8"></span>訓練集文件（淡色）／其他文件</li>
+          <li><span class="sw q"></span>查詢（左圖依來源著色）</li>
+          <li><span class="sw" style="background:var(--s1);box-shadow:0 0 0 1.5px var(--ink)"></span>範例之對應文件（左圖）</li>
+          <li><span class="sw ring"></span>前 10 筆結果（右圖）</li>
+          <li><span class="sw ln"></span>實線：排名第 1　<span class="sw ln dash"></span>虛線：未排第 1（僅左圖）</li>
+        </ul>
+      </div>
+      <p class="note" id="spaceNote">本圖為近似呈現：模型實際於 768 維空間運作，此處以雙曲多維尺度法（hyperbolic MDS）將距離關係投影至 3 維 Poincaré 球，查詢位置亦依其與各文件之距離估算；圖中遠近僅供參考，排名與連線均以實際 768 維距離為準。</p>
+    </section>
+
+    <section aria-labelledby="h-about">
+      <h2 id="h-about">系統說明</h2>
+      <div class="about">
+        <dl class="spec">
+          <dt>基礎模型</dt><dd>CodeT5-base 編碼器，以 encoder 輸出之平均（mean pooling）作為向量表示</dd>
+          <dt>預訓練</dt><dd>SANTA 結構感知預訓練：結構化資料對齊（SDA）與遮罩實體預測（MEP），未另行微調</dd>
+          <dt>相似度</dt><dd>Poincaré 球模型中之雙曲距離，距離越小代表越相符</dd>
+          <dt>查詢資料</dt><dd>以大型語言模型產生之匿名化英文文件描述（不含文件識別碼）</dd>
+          <dt>評估結果</dt><dd>於 100 份未見文件之測試集：MRR 0.70，Hits@1 56%，Hits@10 93%</dd>
+        </dl>
+        <div>
+          <div class="tablebox">
+            <table>
+              <thead><tr><th>文件來源</th><th class="n">訓練集文件</th><th class="n">未見文件</th><th class="n">合計</th></tr></thead>
+              <tbody id="srcBody"><tr><td colspan="4">載入中…</td></tr></tbody>
+              <tfoot><tr><td>總計</td><td class="n" id="totTrain">–</td><td class="n" id="totUnseen">–</td><td class="n" id="totAll">–</td></tr></tfoot>
+            </table>
+          </div>
+          <p class="note">檢索範圍涵蓋全部文件。屬訓練集之文件於結果中標示<span class="tag" style="margin-left:4px">訓練集文件</span>；模型於訓練時已接觸其描述，其檢索表現可能高於實際應用情境。</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p>本系統為研究用原型，檢索結果僅供參考。</p>
+  </div>
+</footer>
+
+<script src="/static/plotly-2.35.2.min.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  let examples = [], expected = null, space = null, lastSearch = null;
+  const SRC_VAR = { "S1000D specification sample": "--s1", "Bike sample (S1000D Issue 7)": "--s2",
+                    "s1kd-tools documentation": "--s3", "FOSSIG": "--s4" };
+  const EYE = { x: 1.12, y: 1.12, z: 0.62 };
+
+  async function api(path, opts = {}) {
+    const r = await fetch(path, Object.assign({}, opts, { headers: Object.assign({ "Content-Type": "application/json" }, opts.headers || {}) }));
+    const body = await r.json().catch(() => ({}));
+    if (!r.ok) { const e = new Error(body.detail || ("請求失敗（" + r.status + "）")); e.status = r.status; throw e; }
+    return body;
+  }
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  async function boot() {
+    try {
+      const d = await api("/api/examples");
+      examples = d.examples; renderExamples(); renderSources(d.sources);
+    } catch (e) { $("exs").replaceChildren(el("p", "notice err", "無法連線至檢索服務：" + e.message)); }
+    try {
+      space = await api("/api/space");
+      $("spaceNote").textContent += "投影應力值（stress）為 " + space.stress + "，數值越低表示越貼近實際距離。";
+      renderLegend(); drawBall(); draw("ballEx", exampleTraces());
+      const ex = space.examples || [];
+      $("exSummary").textContent = "12 筆範例中，對應文件排名第 1 者 " + ex.filter(e => e.rank === 1).length + " 筆、前 10 名內 "
+        + ex.filter(e => e.rank <= 10).length + " 筆（檢索範圍為全部 " + space.docs.length + " 份文件）。";
+    } catch (e) { ["ballEx", "ballQ"].forEach(id => $(id).replaceChildren(el("p", "empty", "目前無法載入 3D 視覺化：" + e.message))); }
+  }
+
+  function renderSources(sources) {
+    const body = $("srcBody"); body.replaceChildren();
+    let tr = 0, un = 0;
+    sources.forEach(s => {
+      const row = el("tr");
+      row.append(el("td", null, s.name), el("td", "n", s.train), el("td", "n", s.unseen), el("td", "n", s.train + s.unseen));
+      body.append(row); tr += s.train; un += s.unseen;
+    });
+    $("totTrain").textContent = tr; $("totUnseen").textContent = un; $("totAll").textContent = tr + un;
+  }
+
+  function renderExamples() {
+    const box = $("exs"); box.replaceChildren();
+    examples.forEach(x => {
+      const b = el("button", "ex"); b.type = "button";
+      b.append(el("small", null, x.source), el("span", "txt", x.query));
+      b.addEventListener("click", () => { $("q").value = x.query; expected = x; run(); });
+      box.append(b);
+    });
+  }
+
+  function renderLegend() {
+    const ul = $("legend"); ul.replaceChildren();
+    Object.keys(SRC_VAR).forEach(name => {
+      const li = el("li"); const sw = el("span", "sw"); sw.style.background = "var(" + SRC_VAR[name] + ")";
+      li.append(sw, document.createTextNode(name)); ul.append(li);
+    });
+  }
+
+  // ---- 3-D ball ----------------------------------------------------------------------------------------------
+  // Wireframe ball in Plotly 3-D
+  function sphereTraces() {
+    const lines = { x: [], y: [], z: [] }, push = f => {
+      for (let j = 0; j <= 96; j++) { const v = f(2 * Math.PI * j / 96); lines.x.push(v[0]); lines.y.push(v[1]); lines.z.push(v[2]); }
+      lines.x.push(null); lines.y.push(null); lines.z.push(null); };
+    [-0.6, -0.3, 0, 0.3, 0.6].forEach(h => { const r = Math.sqrt(1 - h * h); push(t => [r * Math.cos(t), r * Math.sin(t), h]); });
+    for (let k = 0; k < 6; k++) { const a = Math.PI * k / 6; push(t => [Math.cos(a) * Math.cos(t), Math.sin(a) * Math.cos(t), Math.sin(t)]); }
+    return [Object.assign(lines, { type: "scatter3d", mode: "lines", line: { color: "#dde2ea", width: 1.5 }, hoverinfo: "skip" })];
+  }
+
+  function lighten(hex, f) {  
+    const n = parseInt(hex.slice(1), 16), c = [n >> 16, (n >> 8) & 255, n & 255].map(v => Math.round(v + (255 - v) * f));
+    return "rgb(" + c.join(",") + ")";
+  }
+
+  // background
+  function docTraces(dimAll) {
+    const out = [];
+    Object.keys(SRC_VAR).forEach(name => {
+      const col = css(SRC_VAR[name]);
+      [true, false].forEach(seen => {
+        const ds = space.docs.filter(d => d.source === name && d.seen_in_training === seen);
+        if (!ds.length) return;
+        const light = dimAll || seen;
+        out.push({ type: "scatter3d", mode: "markers", x: ds.map(d => d.p[0]), y: ds.map(d => d.p[1]), z: ds.map(d => d.p[2]),
+          marker: { size: light ? 2.6 : 4, color: light ? lighten(col, dimAll ? 0.72 : 0.6) : col, opacity: 1, line: { width: 0 } },
+          text: ds.map(d => "<b>" + esc(d.title) + "</b><br>" + esc(name) + (seen ? " · 訓練集文件" : " · 未見文件")),
+          hovertemplate: "%{text}<extra></extra>" });
+      });
+    });
+    return out;
+  }
+
+  function lineTrace(pairs, dash) {
+    const L = { x: [], y: [], z: [] };
+    pairs.forEach(([a, b]) => { L.x.push(a[0], b[0], null); L.y.push(a[1], b[1], null); L.z.push(a[2], b[2], null); });
+    return Object.assign(L, { type: "scatter3d", mode: "lines", line: { color: css("--ink2"), width: 3, dash: dash }, hoverinfo: "skip" });
+  }
+
+  const wrap = (t, n) => esc(t).replace(new RegExp("(.{1," + n + "})(\\s|$)", "g"), "$1<br>");
+
+  function exampleTraces() {
+    const idx = new Map(space.docs.map((d, i) => [d.docid, i])), ex = space.examples || [];
+    const doc = e => space.docs[idx.get(e.expected_docid)];
+    const out = docTraces(true);
+    out.push(lineTrace(ex.filter(e => e.rank === 1).map(e => [e.p, doc(e).p]), "solid"));
+    out.push(lineTrace(ex.filter(e => e.rank !== 1).map(e => [e.p, doc(e).p]), "dash"));
+    out.push({ type: "scatter3d", mode: "markers", x: ex.map(e => doc(e).p[0]), y: ex.map(e => doc(e).p[1]), z: ex.map(e => doc(e).p[2]),
+      marker: { size: 7, color: ex.map(e => css(SRC_VAR[e.source])), line: { color: css("--ink"), width: 1.5 } },
+      text: ex.map(e => "<b>對應文件</b>　" + esc(e.expected_title) + "<br>此範例之檢索排名：第 " + e.rank + " 位"),
+      hovertemplate: "%{text}<extra></extra>" });
+    out.push({ type: "scatter3d", mode: "markers", x: ex.map(e => e.p[0]), y: ex.map(e => e.p[1]), z: ex.map(e => e.p[2]),
+      marker: { size: 6, symbol: "diamond", color: ex.map(e => css(SRC_VAR[e.source])), line: { color: css("--ink"), width: 1.5 } },
+      text: ex.map(e => "<b>範例查詢</b>（" + esc(e.source) + "）<br>" + wrap(e.query, 70) + "對應文件排名：第 " + e.rank + " 位"),
+      hovertemplate: "%{text}<extra></extra>" });
+    return out;
+  }
+
+  function queryTraces(top) {
+    const out = docTraces(false);
+    if (!top || !top.query_point) return out;
+    const idx = new Map(space.docs.map((d, i) => [d.docid, i]));
+    const pts = top.results.map(r => space.docs[idx.get(r.docid)]).filter(Boolean), q = top.query_point;
+    out.push(lineTrace(pts.map(d => [q, d.p]), "solid"));
+    out.push({ type: "scatter3d", mode: "markers", x: pts.map(d => d.p[0]), y: pts.map(d => d.p[1]), z: pts.map(d => d.p[2]),
+      marker: { size: 8, symbol: "circle-open", color: css("--ink"), line: { width: 2 } },
+      text: top.results.slice(0, pts.length).map(r => "<b>第 " + r.rank + " 名</b>　" + esc(r.title) + "<br>雙曲距離 " + r.distance.toFixed(3)),
+      hovertemplate: "%{text}<extra></extra>" });
+    out.push({ type: "scatter3d", mode: "markers", x: [q[0]], y: [q[1]], z: [q[2]],
+      marker: { size: 7, symbol: "diamond", color: css("--ink") }, text: ["<b>目前查詢</b>"], hovertemplate: "%{text}<extra></extra>" });
+    return out;
+  }
+
+  function draw(id, traces) {
+    if (!space || !window.Plotly) return;
+    const ax = { visible: false, range: [-1.05, 1.05] }, node = $(id);
+    const sc = node._fullLayout && node._fullLayout.scene;
+    Plotly.react(node, sphereTraces().concat(traces), {
+      margin: { l: 0, r: 0, t: 0, b: 0 }, paper_bgcolor: "#ffffff", showlegend: false,
+      font: { family: css("--sans"), color: css("--ink"), size: 12 },
+      hoverlabel: { bgcolor: "#ffffff", bordercolor: css("--rule2"), font: { color: css("--ink"), family: css("--sans"), size: 12 } },
+      scene: { xaxis: ax, yaxis: ax, zaxis: ax, aspectmode: "cube", dragmode: "turntable", bgcolor: "#ffffff",
+        camera: { eye: sc ? sc.camera.eye : EYE, center: { x: 0, y: 0, z: 0 }, up: { x: 0, y: 0, z: 1 } } }
+    }, { displayModeBar: false, responsive: true });
+  }
+  function drawBall() { draw("ballQ", queryTraces(lastSearch)); }
+
+  document.querySelectorAll(".reset").forEach(b => b.addEventListener("click", () =>
+    window.Plotly && Plotly.relayout($(b.dataset.plot), { "scene.camera.eye": EYE })));
+
+  // ---- search ------------------------------------------------------------------------------------------------
+  async function run() {
+    const q = $("q").value.trim();
+    if (!q) { $("q").focus(); return; }
+    if (expected && expected.query !== q) expected = null;
+    $("go").disabled = true; $("go").textContent = "檢索中…";
+    try {
+      lastSearch = await api("/api/search", { method: "POST", body: JSON.stringify({ query: q, k: 10 }) });
+      render(lastSearch); drawBall();
+      const hit = expected && lastSearch.results.find(r => r.docid === expected.expected_docid);
+      $("qSummary").textContent = "查詢以 ◆ 表示，前 10 筆結果以圓圈標示" + (expected ? "；此範例之對應文件" + (hit ? "排名第 " + hit.rank + " 位。" : "未列入前 10 筆。") : "。");
+    } catch (e) {
+      $("out").replaceChildren(el("p", "notice err", e.message));
+    } finally { $("go").disabled = false; $("go").textContent = "檢索"; }
+  }
+
+  function render(d) {
+    const out = $("out"); out.replaceChildren();
+    if (d.truncated) out.append(el("p", "notice warn", "查詢長度為 " + d.query_tokens + " 個 token，模型僅讀取前 " + d.q_max_len + " 個（約 35 個英文字），其後內容未納入排序。"));
+    if (expected) {
+      const hit = d.results.find(r => r.docid === expected.expected_docid);
+      out.append(el("p", hit && hit.rank === 1 ? "notice ok" : "notice warn",
+        hit ? "對應文件排名第 " + hit.rank + " 位。" : "對應文件（" + expected.expected_title + "）未列入前 10 筆。"));
+    }
+    const table = el("div", "rtable"), head = el("div", "rhead");
+    head.append(el("span", null, "排名"), el("span", null, "文件"), el("span", null, d.similarity === "poincare" ? "雙曲距離" : "分數"));
+    table.append(head);
+    d.results.forEach(r => {
+      const isExp = expected && r.docid === expected.expected_docid;
+      const li = el("div", "res" + (isExp ? " expected" : ""));
+      const row = el("button", "rrow"); row.type = "button"; row.setAttribute("aria-expanded", "false");
+      const mid = el("div"), t = el("div", "t", r.title);
+      if (isExp) t.append(el("span", "badge", "對應文件"));
+      if (r.seen_in_training) t.append(el("span", "tag", "訓練集文件"));
+      const meta = el("div", "meta"); meta.append(el("span", null, r.source), el("code", null, r.file));
+      mid.append(t, meta);
+      row.append(el("span", "rank", r.rank), mid, el("span", "dist", (d.similarity === "poincare" ? r.distance : r.score).toFixed(3)));
+      row.addEventListener("click", () => toggleDoc(li, row, r.docid));
+      li.append(row); table.append(li);
+    });
+    out.append(table, el("p", "note", "點選任一結果可展開該文件之 XML 原文；查詢於嵌入空間中之位置請見下方 3D 視覺化。"));
+  }
+
+  async function toggleDoc(li, row, docid) {
+    const open = li.querySelector(".xml");
+    if (open) { open.remove(); row.setAttribute("aria-expanded", "false"); return; }
+    const pre = el("pre", "xml", "載入中…"); li.append(pre); row.setAttribute("aria-expanded", "true");
+    try { pre.textContent = (await api("/api/doc/" + encodeURIComponent(docid))).xml; }
+    catch (e) { pre.textContent = "無法載入文件：" + e.message; }
+  }
+
+  $("searchForm").addEventListener("submit", e => { e.preventDefault(); run(); });
+  $("q").addEventListener("keydown", e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) run(); });
+  boot();
+})();
+</script>
+</body>
+</html>

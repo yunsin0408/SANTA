@@ -1,4 +1,7 @@
-/data/
+/data/*
+!/data/xml/
+/data/xml/tokenized/
+/data/xml/retrieval_advtest/
 /runs/
 /OpenMatch/
 
@@ -20,3 +23,15 @@ wandb/
 # Editor / OS
 .vscode/
 .DS_Store
+
+# XML track
+.env
+results/**/embeddings.npz
+results/**/*.xlsx
+demo/logs/
+demo/cache/
+# raw datasets: only the XML documents and XSD schemas are tracked
+/processing/XML/datasets/*/**
+!/processing/XML/datasets/*/**/
+!/processing/XML/datasets/*/**/*.[xX][mM][lL]
+!/processing/XML/datasets/*/**/*.[xX][sS][dD]

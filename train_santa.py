@@ -93,8 +93,9 @@ def main():
         cache_dir=data_args.data_cache_dir or model_args.cache_dir
     )
     eval_dataset = train_dataset_cls(
-        tokenizer,
-        data_args,
+        tokenizer=tokenizer,
+        data_args=data_args,
+        santa_args=santa_args,
         is_eval=True,
         cache_dir=data_args.data_cache_dir or model_args.cache_dir
     ) if data_args.eval_path is not None else None

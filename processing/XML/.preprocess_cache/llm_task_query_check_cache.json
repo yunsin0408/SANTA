@@ -1,0 +1,170 @@
+{
+"8d87ce951f8184062c332e032e0efda016c44571417fa58540da81a11714abdc": [
+{
+"index": 0,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "Only the source is titled about the information control number; C1 is the general information management chapter."
+},
+{
+"index": 1,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "The source specifically covers the ICN within information management; the other candidates cover different topics."
+},
+{
+"index": 2,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "No candidate other than the source addresses the information control number."
+}
+],
+"a2d8a84bbcfecc87fb7ab095f11e0b4865a7c4375de41861eff0bfb39945052d": [
+{
+"index": 0,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "Only the source covers generation and use of business rules; C2 is narrowly about coding BREX modules."
+},
+{
+"index": 1,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "The query matches the source's title topic, and no candidate covers business rules generation."
+},
+{
+"index": 2,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "Creating project business rules is the source's topic; the BREX coding candidate is too narrow."
+}
+],
+"0f5e0162ba2d4e5eeb078d8e6bec4aca721fac8528c05234478ee8c6eb6e29aa": [
+{
+"index": 0,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "Only the source covers the disassembly code variant segment of the data module code."
+},
+{
+"index": 1,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "No candidate addresses disassembly code variants; the others cover BREX, business rules, ICN, or a SCORM tool."
+},
+{
+"index": 2,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "The source's title matches directly, and no candidate covers this code segment."
+}
+],
+"130867231d8fc2f8488f5f2256a8a64e663f06b964b944974c588b20145c3b43": [
+{
+"index": 0,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "Only the source covers interchange of data modules; C4 is the general information management chapter, not interchange-specific."
+},
+{
+"index": 1,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "Exchanging data modules maps to the source's interchange topic; C2 is about learning object metadata interchange."
+},
+{
+"index": 2,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "The source is the only module titled for data module interchange; the other candidates cover ICN, CIR updates, LOM or the general chapter."
+}
+],
+"05e733bc2f06ce4ceab307e3da88063d81ec7248386c5cc380f6d9827348eb38": [
+{
+"index": 0,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "The source is the top-level information management chapter, whereas C1 and C3 cover narrower subtopics (control numbers, interchange)."
+},
+{
+"index": 1,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "The source is the chapter itself; the subsection candidates only imply the chapter and cover specific subtopics."
+},
+{
+"index": 2,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "Only the source is the opening, chapter-level module for information management."
+}
+],
+"114e780bd4497fd805a557fb344838b7c8aebc1397767ca4b51f868bc7bf9026": [
+{
+"index": 0,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "Only the source covers how BREX data modules are coded."
+},
+{
+"index": 1,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "The query targets BREX-specific coding, which only the source covers; the general info code list is a weaker match."
+},
+{
+"index": 2,
+"verdict": "ambiguous",
+"also_relevant": [
+"C4"
+],
+"rewrite": "rules for building the data module code of a BREX module",
+"multi_relevant_ok": true,
+"reason": "The information code short-definitions chapter also lists the code used for BREX data modules."
+}
+],
+"295511922582c60a8fa034463b9a01774d8d17711cc508bc38a92a07152a19c2": [
+{
+"index": 0,
+"verdict": "unique",
+"also_relevant": [],
+"rewrite": "",
+"multi_relevant_ok": false,
+"reason": "Only the source covers coding of BREX data modules; candidates address general DMC parts, ICN, information codes, or business rules generally."
+}
+]
+}

@@ -1,0 +1,136 @@
+# S1000D sample datasets
+
+This directory contains four S1000D Common Source Database (CSDB) samples used for structure-aware XML research. Keep each folder self-contained — references among its data modules, publications, and data-management lists are relative to the other files in that folder.
+
+## Dataset inventory
+
+| Folder | Source and purpose | Local inventory |
+| --- | --- | --- |
+| [`BIKE_7`](BIKE_7/) | **S1000D Bike sample data set, Issue 7.** A fictional product dataset spanning bike, lighting, and brake model-ident data (`S1000DBIKE`, `S1000DLIGHTING`, `BRAKE`), with descriptive, procedural, and BREX content. Example only — does **not** demonstrate S1000D conformance. | 184 files, 118 XML (108 `DMC-` data modules, 4 `PMC-` publication modules, 3 `IMF-` ICN metadata files, 1 `DML-` data-management list, 1 `DDN-` data despatch note, 1 `UPF-` update file) + 66 non-XML assets (40 CGM, 11 PNG, 8 JPG, 5 SVG, 1 GIF, 1 PDF). |
+| [`FOSSIG`](FOSSIG/) | [FOSSIG](https://github.com/kibook/FOSSIG) — applies S1000D to free-software documentation, with reusable business rules and a generic Standard Numbering System (SNS). | 22 files: 10 data modules, 1 publication module, 1 data-management list, and 10 supporting configuration/illustration files. |
+| [`S1000D spec sample`](S1000D%20spec%20sample/) | [kibook/S1000D](https://github.com/kibook/S1000D), a sample CSDB representing the S1000D Issue 4.2 specification. | 333 files: 330 data modules, 1 publication module, 1 data-management list, and 1 defaults file. |
+| [`s1kd-tools-doc`](s1kd-tools-doc/) | [kibook/s1kd-tools-doc](https://github.com/kibook/s1kd-tools-doc) — documents the `s1kd-tools` toolset, produced with [s1kd-tools](https://github.com/kibook/s1kd-tools) and S1000D XSL stylesheets. | 50 files: 44 data modules, 1 publication module, 1 data-management list, 2 defaults/type configuration files, and 2 PNG illustrations. |
+
+**Total local inventory:** 589 files, including 508 XML files.
+
+## S1000D file types
+
+The filename prefixes identify the principal XML object types:
+
+- `DMC-` — data module code; an individual S1000D information module. In these samples, XML data modules use the root element `dmodule`.
+- `PMC-` — publication module code; an ordered publication structure that references data modules. Its XML root element is `pm`.
+- `DML-` — data-management list code; a list of managed S1000D objects. Its XML root element is `dml`.
+- `DDN-` — data despatch note; a manifest of a CSDB data exchange. Its XML root element is `ddn`.
+- `UPF-` — update file; a change/update notification for a data module or other object. Its XML root element is `dataUpdateFile`.
+- `IMF-` — ICN metadata file; descriptive metadata for an associated graphic/illustration. Its XML root element is `icnMetadataFile`.
+- `ICN-` — information control number; associated graphic or other non-XML information object.
+
+Configuration/support files such as `.defaults`, `.dmtypes`, `.fmtypes`, and `.icncatalog` are dataset-specific inputs used by the associated S1000D tooling and publication workflows.
+
+## S1000D schemas (`xsd/`)
+
+[`xsd/`](xsd/) holds the 32 flat S1000D Issue 7 XML Schema modules (`descript.xsd`, `proced.xsd`, `pm.xsd`, `dml.xsd`, `brex.xsd`, etc.), covering every information-kind content model plus the shared/common-construct and cross-reference-table schemas. `preprocess.py` uses them as the authoritative list of S1000D element names (see below). 
+
+## Use and limitations
+
+- `BIKE_7` is an **Issue 7 sample**, suitable for studying XML structure, references, and representative content types, but not for claiming tool or model conformance. It is not bike-only: it also carries lighting and brake model-ident data and several non-`DMC` object types.
+- Before schema validation, select the XSD and BREX rules appropriate to the dataset's S1000D issue and project rules. XML well-formedness alone does not establish S1000D validity.
+
+## Preprocessing scripts
+
+Stages 1–3 run **per dataset folder** — each of the four folders (`BIKE_7`, `FOSSIG`, `S1000D spec sample`, `s1kd-tools-doc`) gets its own independent set of output files under a same-named subdirectory, with no merging across folders. `processing/XML/model_configs.json` then pairs one folder as a model's pretrain source with a *different* folder as its finetune source (12 models: every ordered pair of the 4 folders) — see `XML.md`.
+
+- **`preprocess.py`** — Stage 1: walks every `.XML` file under each input folder and emits one `(description, whole XML file)` positive pair per file — no sub-file chunking; the whole document is the training unit.
+  - **Element whitelist**: every element name declared across the schemas in [`xsd/`](xsd/), cached at `../.preprocess_cache/s1000d_element_whitelist.json`. Used to sanity-check each file's root element (a foreign/edge-case root is logged and kept, not dropped) and reused by Stage 2 for tag-mask eligibility.
+  - **Description generation**: LLM-only, one description per file — a single cached, checkpointed Claude Haiku 4.5 call per unique whole-file document (falls back to an extractive summary if uncalled), truncated to `LLM_PROMPT_MAX_CHARS=16000` characters for very large documents.
+  - **Duplicates**: whole-file exact duplicates (by content hash) are logged, never dropped — dropping a record at this granularity discards an entire document from an already-small corpus.
+  - **Output**: `data/xml/pretrain/<folder_slug>/sda_pairs.{train,dev,test}.jsonl`. Each record: `{"structured", "text", "source_file", "dataset", "element", "tier", "generated_by"}`.
+  - Run: `python3 preprocess.py [--input-dirs ...] [--output-dir ...] [--max-llm-calls N] [--llm-concurrency N] [--llm-model ...]`. Default safety cap is 600 live calls/run, covering roughly one call per file across all four folders (~511 files) in a single from-scratch run — a large simplification versus the old per-element chunking, which needed `--max-llm-calls 20000`+ for ~19,800 candidate snippets.
+
+- **`build_xml_entity.py`** — Stage 2: builds Masked Tag Prediction (MEP) examples from each folder's `sda_pairs.*.jsonl`, adapting [SANTA](https://arxiv.org/abs/2305.19912)'s entity-masking idea to XML structure.
+  - **What's masked**: element *tag names*, not attribute/text values. For each whole-file document, a random subset of tag *occurrences* (default 50%, no dedup-by-tag-name — repeated tags like sibling `<step>`s are structurally normal) is replaced by a shared T5 sentinel token (`<extra_id_0>`, ...); attributes on masked elements are kept as context. The document root is never masked.
+  - **Eligibility**: by default, only S1000D-whitelisted tags are maskable (`--tag-whitelist`/`--no-tag-whitelist`, default on) — reuses `preprocess.py`'s element whitelist to keep the objective scoped to genuine S1000D vocabulary rather than incidental namespace plumbing.
+  - **Downsampling** (`--mask-ratio`, default 0.5): fraction of tag occurrences masked, capped at 99 total.
+  - **Output**: `data/xml/pretrain/<folder_slug>/mep_pairs.{train,dev,test}.jsonl`. Each record: `{"structured", "masked_structured", "label", "num_masked_tags", "source_file", "dataset", "element"}`. Documents with no maskable tags are dropped.
+  - Run: `python3 build_xml_entity.py [--pretrain-root ...] [--datasets FOLDER ...] [--mask-ratio F] [--random-seed N] [--tag-whitelist/--no-tag-whitelist]`.
+
+- **`build_retrieval_dataset.py`** — Stage 3: builds a retrieval finetuning/evaluation dataset from each folder's `sda_pairs.*.jsonl`, mirroring SANTA's Adv/ESCI-small benchmarks (Table 1 of the paper).
+  - **Cleanup vs. Stage 1**: documents are deduped to one corpus entry per unique content hash, and descriptions that map to more than one distinct document are dropped as ambiguous queries — "the correct document" needs to be well-defined for retrieval eval. The old parent/child snippet-nesting source of near-duplicate documents no longer exists now that each record is a whole file.
+  - **Splits**: reuses Stage 1's file-level train/dev/test assignment, per folder.
+  - **Output**: `data/xml/retrieval/<folder_slug>/{corpus,queries}.{train,dev,test}.jsonl` and `qrels.{train,dev,test}.tsv`, in the BEIR/OpenMatch layout. `corpus.jsonl`: `{"docid", "structured", "element", "dataset", "source_file"}`. `queries.jsonl`: `{"qid", "text", "element", "dataset", "source_file"}`. `qrels.tsv`: `query-id\tcorpus-id\tscore` (always `1`).
+  - Run: `python3 build_retrieval_dataset.py [--pretrain-root ...] [--output-root ...] [--datasets FOLDER ...]`.
+  - **Known limitation**: per-folder split sizes are small (e.g. FOSSIG: 8 train/2 dev/2 test documents; s1kd-tools-doc: 39/4/3) since each folder's retrieval benchmark is now built in isolation rather than pooled across all four — see the split-ratio row in "Open experiment variables" below.
+
+## Rebuilding `data/xml/`
+
+All of `data/xml/` is tracked in git (only `data/xml/tokenized/` is gitignored). The non-LLM part can be rebuilt from `data/xml/pretrain/`, `data/xml/pretrain_anonq/`, `data/xml/queries_pooled_taskq/` and the LLM response caches in `processing/XML/.preprocess_cache/` with the commands below (run from the repo root, in this order). Every step was checked to reproduce the existing files byte-for-byte (2026-10-19).
+
+```bash
+PY=.venv/bin/python
+# per-folder retrieval benchmarks (original + anonymized queries) and the 332-doc pool
+$PY processing/XML/datasets/build_retrieval_dataset.py
+$PY processing/XML/datasets/build_retrieval_dataset.py --pretrain-root data/xml/pretrain_anonq --output-root data/xml/retrieval_anonq --datasets S1000D_spec_sample
+$PY processing/XML/datasets/build_full_corpus.py --root data/xml/retrieval/S1000D_spec_sample
+$PY processing/XML/datasets/build_full_corpus.py --root data/xml/retrieval_anonq/S1000D_spec_sample
+# same-domain halves: original split and the alt split (salt "alt2"), each with an anonymized-query copy
+$PY processing/XML/datasets/build_samedomain_split.py
+$PY processing/XML/datasets/build_samedomain_split.py --salt alt2 --pretrain-out data/xml/pretrain_samedomain_alt --retrieval-out data/xml/retrieval_samedomain_alt
+$PY processing/XML/datasets/build_samedomain_split_anonq.py
+$PY processing/XML/datasets/build_samedomain_split_anonq.py --suffix _alt
+# pooled 508-doc split (data/xml/{pretrain,retrieval}_pooled{,_anonq}/)
+$PY processing/XML/datasets/build_pooled_split.py
+```
+
+The tokenized `data/xml/tokenized/data*/` folders are then built from these by `processing/XML/prepare_data.py`, `processing/XML/prepare_samedomain.py`, and `processing/XML/prepare_pooled.py` (see `results/README.md` for which experiment used which).
+
+Regenerating the LLM layer itself, if ever needed, replays the caches with no API calls: `preprocess.py --max-llm-calls 0` (508/508 cache hits) and `build_xml_entity.py` reproduce `data/xml/pretrain/`, and `generate_anon_queries.py --folder <F>` reproduces `data/xml/pretrain_anonq/`. That script exits when `ANTHROPIC_API_KEY` is unset, even if every document is already cached. The exception is `data/xml/queries_pooled_taskq/`: its cache is missing 42 documents, so it has to be kept as committed.
+
+## Preprocessing data statistics
+
+**TODO: regenerate after implementation.** The tables below are stale — they describe the old per-element-chunked, four-folder-merged pipeline (up to ~45,000 SDA pairs from nested per-element snippets). Under the current whole-file, per-folder pipeline, each folder contributes exactly one SDA/MEP record per source XML file (file counts and train/dev/test splits are in "Dataset inventory" above and the Stage 3 known-limitation note). Regenerate these tables from a real run of `preprocess.py` / `build_xml_entity.py` / `build_retrieval_dataset.py` rather than hand-editing numbers.
+
+## Open experiment variables (dataset design)
+
+Design questions tracked for experimentation. Notes are generated by AI, should not be viewed as definite. 
+
+### Stage 1 — SDA (`preprocess.py`)
+
+| Variable | Current default | Question | Notes |
+| --- | --- | --- | --- |
+| SDA snippet text placement (in-tag vs. stripped) | Text stays inline inside tags (`ET.tostring` of the element, e.g. `<para>Remove wheels</para>`) | Does this actually teach the model to associate structure with content? | - SDA's contrastive loss (description vs. whole snippet, in-batch negatives) works on the *pooled* embedding, not per-token — doesn't force tag↔word attribution on its own; that job is MEP's.<br>- Keeping text inline is still right for SDA — preserves structure as a discriminative signal, what makes this "structure-aware" vs. plain-text retrieval pretraining.<br>- Candidate ablation: SDA-only with tag-stripped doc side vs. tag-inline doc side, compare downstream MEP/retrieval eval. |
+| Tag semantics/definitions surfaced in NL description text | Descriptions (LLM and template tier) describe content only, not what the tag itself means | Should descriptions be schema/XSD-definition-aware, at least for structural tags? | - Prose tags (`para`, etc.): content dominates meaning, tag definition likely adds little.<br>- Structural/attribute-only tags (`dmCode`, `security`, `issueInfo`, `dmRef`, ...): the tag *is* most of the meaning; template tier already encodes this via hand-written per-tag templates.<br>- Open: does explicit tag-definition text (XSD `xs:annotation`/`xs:documentation`) measurably help on that structural subset, vs. no effect applied uniformly. |
+| LLM description prompt (`_llm_prompt()` in `preprocess.py`) | Single zero-shot user message, no system prompt, no few-shot examples; `claude-haiku-4-5-20251001`, `max_tokens=180`, whole document truncated to `LLM_PROMPT_MAX_CHARS=16000` (with an explicit `[document truncated]` note when it is). Current text verbatim:<br><br>`You are labeling training data for a dense retrieval model that must learn to match natural-language descriptions to whole structured S1000D XML documents.`<br>`Write ONE concise paragraph (max ~60 words) in plain English describing what the following XML document is and what it documents or specifies overall -- its subject, purpose, and principal content. Describe the meaning/content, not the XML syntax itself.`<br><br>`<document root="{root_tag}">{document}</document>` | Every SDA query in the benchmark is a direct product of this prompt — was it validated, and what does each instruction cost or buy? | - The cache key now includes a `PROMPT_VERSION` constant alongside the content hash, so changing the prompt again will correctly miss the cache instead of silently reusing stale descriptions (the previous cache-keying gap is fixed).<br>- "Describe the meaning/content, not the XML syntax itself" still pushes descriptions *away* from tag names — related to the "Tag semantics/definitions" row above, now more consequential since one description must summarize a whole document rather than one element.<br>- Nothing discourages quoting identifier values verbatim — directly feeds the query-leakage issue in the Stage 3 rows below.<br>- Candidate experiments: drop or invert the "not the XML syntax" clause; forbid verbatim identifier copying; few-shot with hand-written exemplars; compare downstream retrieval MRR across variants. |
+
+### Stage 2 — Masked Tag Prediction (MEP, `build_xml_entity.py`)
+
+MEP now masks element *tag names* (previously it masked attribute/text identifier values — that value-masking design was replaced, not kept as a second task).
+
+| Variable | Current default | Question | Notes |
+| --- | --- | --- | --- |
+| What gets masked | A random subset of element tag *occurrences* (default 50%, `--mask-ratio`) in each whole-file document is replaced by a shared T5 sentinel (`<extra_id_0>`, ...); the model must reconstruct the original tag name for each occurrence. No cross-occurrence dedup by tag name — repeated tags (e.g. sibling `<step>`s) are structurally normal, unlike a repeated identifier value, so every selected occurrence gets its own sentinel/label slot. The document root is never masked (no parent/sibling context to recover it from). | Is occurrence-level (not value-level) masking, with no per-sibling-group stratification, the right design? | - A small sibling group fully masked by chance is accepted as noise, not actively prevented.<br>- Whole-file inputs contain far more elements than the old per-element snippets did, so at 0.5 the 99-tag cap (`MAX_ENTITIES`) binds more often, and `label` sequences run longer — `l_max_len` (see hyperparameters table below) needs re-measurement against the new distribution. |
+| Attributes on masked elements | Kept (not stripped) — they're the richest recovery signal for attribute-heavy structural tags (`dmCode`, `security`, `issueInfo`). | Should attributes be stripped for tokenization purity instead? | - Tokenization caveat: when a masked element has attributes, the rendered opening tag (e.g. `<extra_id_3 modelIdentCode="...">`) is **not** the exact literal `<extra_id_3>` substring a T5 tokenizer recognizes as a reserved sentinel — it gets subword-tokenized as ordinary text instead. The *label* side's sentinels are always exact matches regardless. Closing tags (`</extra_id_3>`) can never be literal sentinel matches either way (XML close-tag syntax always inserts `/`).<br>- This is an intentional content-preserving tradeoff (attributes as context outweigh exact-token purity), not silently decided as final — candidate ablation: attributes-stripped vs. attributes-kept, compare downstream MEP loss/eval. |
+| Maskable-tag eligibility | Restricted by default to the S1000D schema element whitelist (`--tag-whitelist`, default on; `--no-tag-whitelist` to disable) | Should every tag (including incidental namespace plumbing like `xlink:simpleLink`/`rdf:RDF`) be eligible, not just whitelisted S1000D vocabulary? | - Whitelist-on keeps the objective scoped to genuine S1000D structural vocabulary, mirrors Stage 1's own whitelist-gated philosophy, and is free to reuse (`build_element_whitelist()`).<br>- The whitelist is broad (every element name declared across all 32 XSDs), so in practice this excludes only accidental non-S1000D content — worth an ablation to confirm the effect is actually small. |
+
+### Stage 3 — retrieval dataset construction (`build_retrieval_dataset.py`)
+
+| Variable | Current default | Question | Notes |
+| --- | --- | --- | --- |
+| Train/dev/test split ratio (`split_for_file()` in `preprocess.py`) | **90/3/7** by `md5(filename) % 100`, assigned **per source XML file**, applied **per dataset folder** independently (each folder's retrieval benchmark is built in isolation — no pooling across folders). Copies SANTA's own Code Search finetune split ratio (CodeSearchNet/Adv: 251,820/9,604/19,210 train/dev/test ≈ 89.7/3.4/6.9%) rather than an arbitrary round number — chosen over SANTA's Product Search ratio (ESCI, ≈61.2/8.6/30.2%) since t2xml's structured-document retrieval task is a closer analog to code search than product search. Actual outcome: BIKE_7 109/3/6, FOSSIG 8/2/2, S1000D spec sample 297/14/21, s1kd-tools-doc 39/4/3 (train/dev/test file counts). | **Still escalated, not resolved**: is a single-digit-file test slice usable at all for FOSSIG/s1kd-tools-doc, regardless of the exact percentage? | - Moving from 90/5/5 to 90/3/7 changed the dev/test split *within* each folder but didn't change the fundamental problem — FOSSIG and s1kd-tools-doc are just too few files for any fixed percentage to produce a stable evaluation set (test = 2-3 documents either way).<br>- Deliberately out of scope to fix further under this change (only the ratio itself, not the underlying per-folder-isolation design, was in scope) — remains the single most urgent open item for anyone reporting per-folder retrieval numbers on the two smallest folders.<br>- Candidate directions unchanged from before: (a) per-folder split ratios sized to each folder; (b) k-fold cross-validation over each folder's files, reporting mean±std — most defensible for FOSSIG/s1kd-tools-doc at this size; (c) accept that FOSSIG/s1kd-tools-doc-as-finetune-target models report a wide-uncertainty number and say so explicitly rather than a clean single MRR. |
+| Query/doc overlap from deriving the retrieval benchmark out of `sda_pairs.*.jsonl` | **Resolved by construction.** Each `sda_pairs` record is now a whole file, not a nested per-element snippet, so the parent/child snippet-nesting mechanism that previously let two corpus entries be near-paraphrases of each other (one a text substring of the other) no longer exists — there is nothing left to dedup or filter for this specific issue. | — | The separate verbatim-identifier-copying issue below is untouched by this — it's about query *text* content, not document nesting, and still applies at whole-file granularity. |
+| Should queries be regenerated (LLM-rewritten/anonymized) to remove verbatim identifier copying? | Queries are reused as-is from Stage 1's `text` field. All descriptions are now LLM-generated (the template tier was retired in the whole-file migration), but LLM-tier descriptions still freely quote identifiers/dates found in the document ("issue 009", "June 19, 2024", "S1000DBIKE", ...). | Does a query that recites its document's own identifier strings measure retrieval, or just string matching? | - Survives any corpus-side dedup, since it's about what the query text contains, not document overlap.<br>- These identifiers are globally rare (near-unique per source file), so exact-match on them can rank the positive first with no structural understanding at all.<br>- Counterpoint (why this isn't obviously a bug): a real S1000D user *does* search by `dmCode`/issue number, so identifier-bearing queries are realistic. The question is whether the benchmark should be *dominated* by them, not whether they belong at all.<br>- Candidate directions: (a) regenerate queries with an LLM prompted to describe function/purpose without quoting identifier values; (b) keep them but report a lexical-overlap-stratified breakdown (high- vs. low-overlap query subsets) so the structural-retrieval claim rests on the low-overlap slice.<br>- Untested: no measurement yet of how much of any reported MRR a pure BM25/exact-match baseline recovers, which would separate lexical leakage from genuine model contribution. That baseline is a natural first experiment once real per-model numbers exist. |
+
+### Stage 3 — training hyperparameters (pretrain/finetune, `XML.md`)
+
+**GPU note**: `pretrain-xml.sh`/`finetune-xml.sh` default `CUDA_VISIBLE_DEVICES=0` (overridable). On a host with >1 GPU visible, launching `train_santa.py` directly (not via `torchrun`) makes the HF Trainer auto-enter a distributed code path that hangs forever waiting for a peer process that never joins — confirmed during this migration's smoke test (hung 12+ minutes with zero output on a 2-GPU host; pinning to 1 GPU completed the same run in ~3 seconds). Set `CUDA_VISIBLE_DEVICES` yourself for real multi-GPU training under a proper launcher.
+
+| Variable | Current default | Question | Notes |
+| --- | --- | --- | --- |
+| In-batch vs. hard negatives | `--train_n_passages 1` in both `pretrain-xml.sh` and `finetune-xml.sh` — `trainer.py`'s `get_process_fn` sets `negs = []` whenever `train_n_passages == 1`, so every query has exactly one (positive) passage | Should hard negatives be mined and added via `train_n_passages > 1`, or is pure in-batch-negatives sufficient? | - `SModel.forward` (`model.py`) computes the full `q_reps @ p_reps.T` batch score matrix and does cross-entropy against the diagonal — in-batch negatives by construction, currently the *only* negative source.<br>- Worth an ablation once a hard-negative-mining step exists (e.g. BM25 or a first-pass dense retriever over the corpus). |
+| `p_max_len` (default 256, both scripts) | Static padding to `p_max_len` for every batch (`data_collator.py`'s `QPCollator` uses `padding='max_length'`, not dynamic padding) | Is 256 the right passage budget? | - **Needs re-measurement.** The old measurements (mean 209.5, p50=46, p90=224, p99=1898 tokens) were taken on nested per-element snippets; every `structured` value is now a whole file, so the distribution has shifted meaningfully larger — re-measure per-folder on the new `sda_pairs`/`mep_pairs` output before trusting 256 as a budget.<br>- One scalar can't serve every folder equally either, given BIKE_7/S1000D-spec-sample files run much larger than FOSSIG's; worth deciding whether to (a) change the scalar, or (b) cap/filter/split oversized documents upstream instead of relying on silent truncation. |
+| `q_max_len` (default 50, both scripts) | Static padding, same mechanism as `p_max_len` | Is 50 the right query budget? | - **Needs re-measurement.** The prompt now asks for "max ~60 words" (up from ~40) for a whole-document description rather than a single-element one, so the query-length distribution has likely shifted up from the old measurement (mean 26.4, p99=58) — re-measure against the new `sda_pairs` `text` field. |
+| `l_max_len` (default 64, both scripts) | Static padding, same mechanism | Is 64 the right MEP-label budget? | - **Needs re-measurement.** Whole-file documents contain far more elements than the old per-element snippets, so at `mask_ratio=0.5` the label sequence (one sentinel + tag name per masked occurrence) is very likely much longer than the old measurement (mean 14.8, p99=99) — re-measure against the new `mep_pairs` `label` field once Stage 2 has been rerun. |
+| Learning rate (5e-5 pretrain / 2e-5 finetune) and epochs (10 pretrain / 12 finetune) | Copied verbatim from SANTA's own CodeSearchNet protocol (paper Appendix A.4: lr=2e-5 for the 5 CodeSearch languages, epoch=12; pretrain lr=5e-5, epoch=10) | Do CSN's code-domain values transfer to t2xml's XML domain and corpus scale? | - Unlike the length caps above, this needs an actual training run's loss curve, not a static check.<br>- Risk: most per-folder train splits (e.g. FOSSIG=8, BIKE_7=109, s1kd-tools-doc=39 files) are far smaller than CodeSearchNet's, so the same epoch count means far more repetition per example and real overfitting risk the paper's numbers say nothing about.<br>- Treat lr/epochs as a joint sweep once training is actually run, not as inherited defaults.<br>- **Fixed during the whole-file/per-folder migration**: `pretrain-xml.sh`/`finetune-xml.sh` used to compute an explicit `--max_steps` from `train_size / (per_device_train_batch_size * gradient_accumulation_steps)`, which rounds down to **0 steps** for any folder smaller than one effective batch (16×8=128 examples) — true for every folder except `S1000D_spec_sample`. `--max_steps` is now left unset so `--num_train_epochs` alone governs training length, which works at any dataset size; confirmed via a real smoke-test run (`FOSSIG_to_s1kd-tools-doc`). |
+
+## Provenance
+
+The `FOSSIG`, `S1000D spec sample`, and `s1kd-tools-doc` folders correspond to CSDB examples linked from the [s1kd-tools repository](https://github.com/kibook/s1kd-tools). The Bike description above is the accompanying source notice for the locally included S1000D Bike Issue 7 sample data (`BIKE_7`). Consult the upstream repositories and the S1000D specification for licensing, current releases, schemas, and authoritative conformance guidance.

@@ -24,6 +24,17 @@ from openmatch.modeling.linear import LinearHead
 
 logger = logging.getLogger(__name__)
 
+POINCARE_EPS = 1e-5
+
+
+def poincare_scores(q: Tensor, p: Tensor, eps: float = POINCARE_EPS) -> Tensor:
+    """Negative Poincare distance (curvature -1) between all pairs of points inside the unit ball:
+    q (nq, d), p (np, d) -> (nq, np)."""
+    sq_q, sq_p = (q * q).sum(-1), (p * p).sum(-1)
+    sqdist = (sq_q.unsqueeze(1) + sq_p.unsqueeze(0) - 2 * q @ p.transpose(0, 1)).clamp(min=0)
+    denom = (1 - sq_q.clamp(max=1 - eps)).unsqueeze(1) * (1 - sq_p.clamp(max=1 - eps)).unsqueeze(0)
+    return -torch.acosh((1 + 2 * sqdist / denom).clamp(min=1 + 1e-7))
+
 
 @dataclass
 class DROutput(ModelOutput):
@@ -49,6 +60,8 @@ class SModel(nn.Module):
             head_q: nn.Module = None,
             head_p: nn.Module = None,
             normalize: bool = False,
+            similarity: str = "dot",
+            poincare_scale: float = 0.25,
             model_args: ModelArguments = None,
             data_args: DataArguments = None,
             train_args: TrainingArguments = None,
@@ -56,15 +69,29 @@ class SModel(nn.Module):
     ):
         super().__init__()
 
+        if santa_args is not None and not santa_args.use_contrastive and not santa_args.use_generate:
+            raise ValueError("--use_contrastive False needs --use_generate True: with both losses off there is nothing to train ")
+        if similarity not in ("dot", "poincare"):
+            raise ValueError(f"unknown similarity {similarity!r}")
+        if similarity == "poincare" and normalize:
+            raise ValueError("--similarity poincare needs --normalize False: unit-norm reps all land on one sphere in the "
+                             "ball, where Poincare distance is a monotone function of cosine.")
         self.tied = tied
         self.lm_q = lm_q
         self.lm_p = lm_p
+        if train_args is not None and os.environ.get("GRAD_CKPT") == "1":
+            # Opt-in activation checkpointing so long passages (p_max_len >= 2048) fit in memory.
+            for lm in {id(lm_q): lm_q, id(lm_p): lm_p}.values():
+                lm.gradient_checkpointing_enable()
+                lm.config.use_cache = False
         self.head_q = head_q
         self.head_p = head_p
 
         self.feature = feature
         self.pooling = pooling
         self.normalize = normalize
+        self.similarity = similarity
+        self.poincare_scale = poincare_scale
 
         self.model_args = model_args
         self.train_args = train_args
@@ -89,8 +116,23 @@ class SModel(nn.Module):
             "pooling": self.pooling,
             "linear_head": bool(self.head_q),
             "normalize": self.normalize,
+            "similarity": self.similarity,
+            "poincare_scale": self.poincare_scale,
         }
         return config
+
+    def to_ball(self, reps: Tensor) -> Tensor:
+        """Exponential map at the origin of the Poincare ball"""
+        x = reps.float() * self.poincare_scale
+        norm = x.norm(dim=-1, keepdim=True).clamp(min=POINCARE_EPS)
+        return torch.tanh(norm) * x / norm
+
+    def score(self, q_reps: Tensor, p_reps: Tensor) -> Tensor:
+        """Similarity matrix, shared by training and evaluation. q_reps / p_reps are
+        already normalized when self.normalize is set."""
+        if self.similarity == "poincare":
+            return poincare_scores(self.to_ball(q_reps), self.to_ball(p_reps))
+        return torch.matmul(q_reps, p_reps.transpose(0, 1))
 
     def forward(
             self,
@@ -102,7 +144,10 @@ class SModel(nn.Module):
         q_hidden, q_reps = self.encode_query(query)
         p_hidden, p_reps, g_loss = self.encode_passage(passage, label)
 
-        scores = torch.matmul(q_reps, p_reps.transpose(0, 1))
+        if self.normalize:
+            q_reps = F.normalize(q_reps, dim=-1)
+            p_reps = F.normalize(p_reps, dim=-1)
+        scores = self.score(q_reps, p_reps) / self.santa_args.temperature
 
         target = torch.arange(
             scores.size(0),
@@ -111,8 +156,11 @@ class SModel(nn.Module):
         )
         target = target * self.data_args.train_n_passages
 
-        loss = self.loss_fn(scores, target)
-        loss = loss + g_loss
+        if self.santa_args.use_contrastive:
+            loss = self.loss_fn(scores, target)
+            loss = loss + g_loss
+        else:
+            loss = g_loss  # MEP-only: the generative loss is the whole objective
 
         if self.training and self.train_args.negatives_x_device:
             loss = loss * self.world_size  # counter average weight reduction
@@ -127,6 +175,12 @@ class SModel(nn.Module):
         if items is None:
             return None, None
         items = BatchEncoding(items)
+        if self.pooling == "mean":
+            hidden = model.encoder(input_ids=items.input_ids, attention_mask=items.attention_mask).last_hidden_state
+            reps = self._mean_pool(hidden, items.attention_mask)
+            if head is not None:
+                reps = head(reps)
+            return hidden, reps
         decoder_input_ids = torch.zeros((items.input_ids.shape[0], 1), dtype=torch.long).to(items.input_ids.device)
         items_out = model(**items, decoder_input_ids=decoder_input_ids, output_hidden_states=True, return_dict=True)
         hidden = items_out.decoder_hidden_states[-1]
@@ -135,12 +189,29 @@ class SModel(nn.Module):
             reps = head(reps)  # D * d
         return hidden, reps
 
+    @staticmethod
+    def _mean_pool(hidden, attention_mask):
+        mask = attention_mask.unsqueeze(-1).to(hidden.dtype)
+        return (hidden * mask).sum(1) / mask.sum(1).clamp(min=1)
+
     def encode_p(self, items, model, head,labels):
         if items is None:
             return None, None
         items = BatchEncoding(items)
         g_loss=0
         decoder_input_ids = torch.zeros((items.input_ids.shape[0], 1), dtype=torch.long).to(items.input_ids.device)
+        if self.pooling == "mean":
+            # Mean of the encoder output over non-pad tokens; the decoder is only run for the MEP generative loss.
+            if self.santa_args.use_generate and not labels.equal(torch.tensor([0]).to(labels.device)):
+                items_out = model(**items, output_hidden_states=True, return_dict=True, labels=labels)
+                g_loss = items_out.loss
+                hidden = items_out.encoder_last_hidden_state
+            else:
+                hidden = model.encoder(input_ids=items.input_ids, attention_mask=items.attention_mask).last_hidden_state
+            reps = self._mean_pool(hidden, items.attention_mask)
+            if head is not None:
+                reps = head(reps)
+            return hidden, reps, g_loss
         if self.santa_args.use_generate and not labels.equal(torch.tensor([0]).to(labels.device)):
             items_out = model(**items, output_hidden_states=True, return_dict=True, labels=labels)
             g_loss=items_out.loss
@@ -241,6 +312,11 @@ class SModel(nn.Module):
             head_q=head_q,
             head_p=head_p,
             normalize=model_args.normalize if config is None else config["normalize"],
+            # checkpoints saved before these keys existed are dot-product models
+            similarity=(santa_args.similarity if santa_args is not None else "dot") if config is None
+            else config.get("similarity", "dot"),
+            poincare_scale=(santa_args.poincare_scale if santa_args is not None else 0.25) if config is None
+            else config.get("poincare_scale", 0.25),
             model_args=model_args,
             data_args=data_args,
             train_args=train_args,

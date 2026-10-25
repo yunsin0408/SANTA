@@ -1,0 +1,40 @@
+#!/bin/bash
+set -e
+# Usage: bash dev_xml_finetune.sh
+#    or: MODEL_NAME=<name from model_configs.json> bash dev_xml_finetune.sh
+# Evaluates every checkpoint from finetune-xml.sh's run (checkpoint-N subdirs, plus
+# the final save at the run root) against <finetune_source>/*.dev.jsonl, then
+# copies whichever scored highest into checkpoints/best_dev -- SANTA's own
+# code_best_dev/product_best_dev pattern, adapted for t2xml's retrieval format.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SANTA_DIR="$(dirname "${SCRIPT_DIR}")"
+PYTHON="${SANTA_DIR}/.venv/bin/python"
+
+export MODEL_NAME=${MODEL_NAME:-}
+export RUN_TAG=${RUN_TAG:-${MODEL_NAME:+/${MODEL_NAME}}}
+if [[ -z "${RUN_TAG}" ]]; then
+    echo "WARNING: RUN_TAG is not set -- writing to the untagged default path (results/), not a tagged experiment folder." >&2
+fi
+# FINETUNE_SOURCE = the folder slug after "_to_" in MODEL_NAME, e.g.
+# BIKE_7_to_FOSSIG -> FOSSIG. No folder slug contains the substring "_to_",
+# so this round-trips cleanly.
+export FINETUNE_SOURCE=${FINETUNE_SOURCE:-${MODEL_NAME##*_to_}}
+export MODEL_PATH=${MODEL_PATH:-${SANTA_DIR}/runs/xml/finetune${RUN_TAG}/checkpoints}
+export RESULTS_PATH=${RESULTS_PATH:-${SANTA_DIR}/results${RUN_TAG}/best_dev_finetune.json}
+# RETRIEVAL_ROOT lets a family point at a different retrieval benchmark (e.g.
+# retrieval_anonq, whose queries don't quote document identifiers) without
+# touching the default original-query benchmark.
+export RETRIEVAL_ROOT=${RETRIEVAL_ROOT:-${SANTA_DIR}/data/xml/retrieval}
+
+cd "${SANTA_DIR}/xml_best_dev"
+"${PYTHON}" evaluate_xml_finetune.py \
+    --model_path ${MODEL_PATH} \
+    --corpus_path ${RETRIEVAL_ROOT}${FINETUNE_SOURCE:+/${FINETUNE_SOURCE}}/corpus.dev.jsonl \
+    --query_path ${RETRIEVAL_ROOT}${FINETUNE_SOURCE:+/${FINETUNE_SOURCE}}/queries.dev.jsonl \
+    --qrels_path ${RETRIEVAL_ROOT}${FINETUNE_SOURCE:+/${FINETUNE_SOURCE}}/qrels.dev.tsv \
+    --per_device_eval_batch_size 64 \
+    --q_max_len ${Q_MAX_LEN:-50} \
+    --p_max_len ${P_MAX_LEN:-256} \
+    --topk 100 \
+    --results_path ${RESULTS_PATH}
