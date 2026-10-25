@@ -14,9 +14,8 @@
 
 | File | Panels | 
 | --- | --- |
-| `02_pooling_fix.png` | baseline (first-token pooling, dot product) → mean pooling + dot (`fixB`) → mean pooling + cosine (`fixA`) → no pretraining + `fixA` config, all on `BIKE_7_to_S1000D_spec_sample` |
+| `pooling_fix.png` | baseline (first-token pooling, dot product) → mean pooling + dot (`fixB`) → mean pooling + cosine (`fixA`) → no pretraining + `fixA` config, all on `BIKE_7_to_S1000D_spec_sample` |
 | `fixA_diff_sources.png` | `fixA_meancos_p1024_s42`'s 3 pretrain sources (BIKE_7, FOSSIG, s1kd-tools-doc), all finetuned on `S1000D_spec_sample` | 
-| `orig_vs_anon.png` | `fixA_meancos_p1024_s42` vs. `anonq_meancos_p1024_s42`, both `BIKE_7_to_S1000D_spec_sample` |  
 
 ## To visualize models
 
@@ -27,5 +26,5 @@
   --method tsne --links --out results/figures/my_comparison.png
 ```
 
-The `embeddings.npz` files are gitignored (local only), so this needs a machine that has run the experiment. Any `results/<tag>/<pair>/embeddings.npz` can be passed to `--model` (label + path) `--links` draws the query→passage lines; drop it for a cleaner plot with many
+The `embeddings.npz` files are gitignored, so this needs a machine that has run the experiment. Any `results/<tag>/<pair>/embeddings.npz` can be passed to `--model` (label + path) `--links` draws the query→passage lines; drop it for a cleaner plot with many
 panels. 

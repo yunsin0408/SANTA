@@ -20,6 +20,4 @@ On `master`:
 | Folder | What |
 | --- | --- |
 | `demo/` | Demo model (`experiments/demo/run_demo_model.sh`) and its gradient-checkpointing rebuild |
-| `demo_repro/` | Reproducibility check of the demo model (`experiments/demo/run_demo_repro.sh`) |
 | `figures/` | Plots from `viz/` |
-| `s1000d_tables.json` | Numbers behind the S1000D tables |
