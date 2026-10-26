@@ -1,0 +1,10 @@
+{
+  "best_checkpoint": "/workspace/t2xml/santa/runs/advtest/advtest_poincare_s42/finetune/checkpoints/checkpoint-22000",
+  "best_dev_mrr": 0.40988833128850305,
+  "per_checkpoint": {
+    "/workspace/t2xml/santa/runs/advtest/advtest_poincare_s42/finetune/checkpoints": 0.40747581284025136,
+    "/workspace/t2xml/santa/runs/advtest/advtest_poincare_s42/finetune/checkpoints/checkpoint-21000": 0.4080936807996537,
+    "/workspace/t2xml/santa/runs/advtest/advtest_poincare_s42/finetune/checkpoints/checkpoint-22000": 0.40988833128850305,
+    "/workspace/t2xml/santa/runs/advtest/advtest_poincare_s42/finetune/checkpoints/checkpoint-23000": 0.4078136104694354
+  }
+}
