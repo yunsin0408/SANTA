@@ -1,0 +1,7 @@
+{
+  "best_checkpoint": "/workspace/t2xml/santa/runs/finetune/poincare_tau0.1/full/checkpoints",
+  "best_dev_mrr": 0.7616666666666667,
+  "per_checkpoint": {
+    "/workspace/t2xml/santa/runs/finetune/poincare_tau0.1/full/checkpoints": 0.7616666666666667
+  }
+}

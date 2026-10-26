@@ -1,0 +1,13 @@
+{
+  "best_checkpoint": "/workspace/t2xml/santa/runs/finetune/pooled_anonq_ss25_poincare_s42/finetuneA_only/checkpoints/checkpoint-125",
+  "best_dev_mrr": 0.5479166666666667,
+  "per_checkpoint": {
+    "/workspace/t2xml/santa/runs/finetune/pooled_anonq_ss25_poincare_s42/finetuneA_only/checkpoints": 0.5054166666666666,
+    "/workspace/t2xml/santa/runs/finetune/pooled_anonq_ss25_poincare_s42/finetuneA_only/checkpoints/checkpoint-25": 0.26559398934398937,
+    "/workspace/t2xml/santa/runs/finetune/pooled_anonq_ss25_poincare_s42/finetuneA_only/checkpoints/checkpoint-50": 0.2942261904761905,
+    "/workspace/t2xml/santa/runs/finetune/pooled_anonq_ss25_poincare_s42/finetuneA_only/checkpoints/checkpoint-75": 0.45166666666666655,
+    "/workspace/t2xml/santa/runs/finetune/pooled_anonq_ss25_poincare_s42/finetuneA_only/checkpoints/checkpoint-100": 0.47891053391053384,
+    "/workspace/t2xml/santa/runs/finetune/pooled_anonq_ss25_poincare_s42/finetuneA_only/checkpoints/checkpoint-125": 0.5479166666666667,
+    "/workspace/t2xml/santa/runs/finetune/pooled_anonq_ss25_poincare_s42/finetuneA_only/checkpoints/checkpoint-150": 0.48547619047619045
+  }
+}

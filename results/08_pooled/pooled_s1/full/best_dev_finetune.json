@@ -1,0 +1,7 @@
+{
+  "best_checkpoint": "/workspace/t2xml/santa/runs/finetune/pooled_s1/full/checkpoints",
+  "best_dev_mrr": 0.8083333333333332,
+  "per_checkpoint": {
+    "/workspace/t2xml/santa/runs/finetune/pooled_s1/full/checkpoints": 0.8083333333333332
+  }
+}

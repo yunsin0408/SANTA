@@ -1,0 +1,5 @@
+{
+  "eval_mrr": 0.7355968011457142,
+  "trec_save_path": "/workspace/t2xml/santa/runs/retrieve/pooled_poincare_s42/pretrainA_finetuneB/test_inference.trec",
+  "qrels_path": "/workspace/t2xml/retrieval_pooled/pooled/qrels.test.tsv"
+}

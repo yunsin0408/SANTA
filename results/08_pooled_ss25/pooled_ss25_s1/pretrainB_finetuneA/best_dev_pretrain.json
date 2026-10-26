@@ -1,0 +1,11 @@
+{
+  "best_checkpoint": "/workspace/t2xml/santa/runs/pretrain/pooled_ss25_s1/pretrainB_finetuneA/checkpoints/checkpoint-75",
+  "best_dev_mrr": 0.60125,
+  "per_checkpoint": {
+    "/workspace/t2xml/santa/runs/pretrain/pooled_ss25_s1/pretrainB_finetuneA/checkpoints": 0.5179166666666666,
+    "/workspace/t2xml/santa/runs/pretrain/pooled_ss25_s1/pretrainB_finetuneA/checkpoints/checkpoint-25": 0.5022438672438672,
+    "/workspace/t2xml/santa/runs/pretrain/pooled_ss25_s1/pretrainB_finetuneA/checkpoints/checkpoint-50": 0.5139105339105339,
+    "/workspace/t2xml/santa/runs/pretrain/pooled_ss25_s1/pretrainB_finetuneA/checkpoints/checkpoint-75": 0.60125,
+    "/workspace/t2xml/santa/runs/pretrain/pooled_ss25_s1/pretrainB_finetuneA/checkpoints/checkpoint-100": 0.5570833333333333
+  }
+}

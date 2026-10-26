@@ -1,0 +1,5 @@
+{
+  "eval_mrr": 0.5894983072483072,
+  "trec_save_path": "/workspace/t2xml/santa/runs/retrieve/pooled_anonq_s42/pretrainonly_sdamep/test_inference.trec",
+  "qrels_path": "/workspace/t2xml/retrieval_pooled_anonq/pooled/qrels.test.tsv"
+}
