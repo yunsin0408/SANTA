@@ -4,7 +4,7 @@ S1000D_spec_sample pairs.
 Rows: {"kind": "train", "step", "epoch", "loss", "learning_rate"} per step (logging_steps 1),
       {"kind": "eval", "step", "epoch", "eval_loss"} every eval_steps, and one {"kind": "summary", "train_loss"} (mean over the run).
 Usage: .venv/bin/python experiments/common/extract_losses.py <results_dir> <tag> [<tag> ...]
-  e.g. results/05_pretrain_diagnosis longpretrain10_s42
+  e.g. results/05_ablation_study longpretrain10_s42
 """
 import ast
 import json

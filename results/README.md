@@ -9,7 +9,7 @@ branched from `master`. `master` holds the shared code, the XML data, the demo a
 | `exp/02-pooling-fix` | Mean pooling / cosine fix |
 | `exp/03-query-leakage` | Identifier-free (anonymized) queries vs. leaky originals |
 | `exp/04-pool-size` | Widened 332-document candidate pool |
-| `exp/05-pretrain-diagnosis` | MEP ablation, pretrain epoch sweep |
+| `exp/05-ablation-study` | Ablation study: which pretraining loss (SDA / MEP), pretrain epoch sweep |
 | `exp/06-same-domain` | Pretrain and finetune on two halves of S1000D_spec_sample |
 | `exp/07-anonymized` | Anonymized-query version of every S1000D experiment |
 | `exp/08-pooled` | Pooled 508-doc split, Poincare similarity, tau sweep, ss25 / q160 variants |

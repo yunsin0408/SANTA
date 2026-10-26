@@ -1,7 +1,7 @@
 #!/bin/bash
 # Usage: [QUERIES=orig|anon] bash experiments/common/run_epoch_sweep.sh <GPU> [EPOCHS...]   (default epochs: 5 30 50 10)
 # Pretrain-epoch sweep extending Ablation 2 (10 vs. 100 epochs, results/README.md): runs run_longpretrain.sh once per
-# epoch count, sequentially, writing results/05_pretrain_diagnosis/longpretrain<N>_s42/. Finetuning stays at 12 epochs.
+# epoch count, sequentially, writing results/05_ablation_study/longpretrain<N>_s42/. Finetuning stays at 12 epochs.
 # 10 is included to give a baseline from this exact script. Checkpoints are deleted after each epoch count finishes.
 # GRAD_CKPT=1 (default here) turns on activation checkpointing (model.py): BIKE_7 peaks at ~32 GB without it, more than
 # the shared GPUs have free. Same gradients, just slower; set GRAD_CKPT=0 to disable.
@@ -14,7 +14,7 @@ export GRAD_CKPT=${GRAD_CKPT:-1}
 if [ "${QUERIES:-orig}" = anon ]; then
   export DATA_ROOT=data_anonq1024 RETRIEVAL_ROOT=$SANTA/data/xml/retrieval_anonq RESULTS_ROOT=$SANTA/results/07_anonymized; PFX=anonq1024_
 else
-  export RESULTS_ROOT=$SANTA/results/05_pretrain_diagnosis; PFX=
+  export RESULTS_ROOT=$SANTA/results/05_ablation_study; PFX=
 fi
 L=runs/xml/${PFX}epoch_sweep_logs; mkdir -p $L
 say() { echo "[$(date '+%F %T')] $*" >> $L/progress.log; }

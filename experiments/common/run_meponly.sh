@@ -8,7 +8,7 @@ MODE=$1; GPU=$2
 SANTA="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"; cd "$SANTA"
 COS="--pooling mean --normalize True --temperature 0.05"
 if [ "$MODE" = orig ]; then
-  TAG=meponly_s42; DATA_ROOT=data_cnt; export RESULTS_ROOT=$SANTA/results/05_pretrain_diagnosis
+  TAG=meponly_s42; DATA_ROOT=data_cnt; export RESULTS_ROOT=$SANTA/results/05_ablation_study
   unset RETRIEVAL_ROOT
 else
   TAG=anonq1024_meponly_s42; DATA_ROOT=data_anonq1024; export RESULTS_ROOT=$SANTA/results/07_anonymized

@@ -7,7 +7,7 @@ Reads the HF Trainer lines in runs/xml/<tag>_logs/<tag>_<source>_to_S1000D_spec_
 1. Writes results/figures/pretrain_overfitting.{pdf,png}:
    top: train loss (per-epoch mean) and dev loss over the 100-epoch run, one panel per source;
    bottom: final pretrain dev loss and test MRR against pretrain epochs.
-2. Updates results/05_pretrain_diagnosis/pretrain_epoch_sweep.xlsx:
+2. Updates results/05_ablation_study/pretrain_epoch_sweep.xlsx:
    - "Final pretrain dev loss" columns (last eval_loss of each run) after the final step loss columns;
    - sheets "Figure" (the PNG + findings), "Pretrain losses" (one row per run and source) and
      "Dev loss curves" (the 100-epoch curves plotted in the figure);
@@ -33,7 +33,7 @@ from openpyxl.utils import get_column_letter
 
 REPO = Path(__file__).resolve().parents[1]
 RUNS = REPO / "runs" / "xml"
-XLSX = REPO / "results" / "05_pretrain_diagnosis" / "pretrain_epoch_sweep.xlsx"
+XLSX = REPO / "results" / "05_ablation_study" / "pretrain_epoch_sweep.xlsx"
 OUT = REPO / "results" / "figures"
 TARGET = "S1000D_spec_sample"
 SOURCES = ["BIKE_7", "FOSSIG", "s1kd-tools-doc"]
@@ -43,7 +43,7 @@ EPOCHS = [5, 10, 30, 50, 100]
 SHEETS = {
     "Original queries": {
         "tag": lambda ep: f"longpretrain{ep}_s42",
-        "results": REPO / "results" / "05_pretrain_diagnosis",
+        "results": REPO / "results" / "05_ablation_study",
         "rows": {5: "longpretrain5_s42", 6: "longpretrain10_s42", 7: "longpretrain30_s42",
                  8: "longpretrain50_s42", 9: None, 10: "longpretrain100_s42"},
     },
