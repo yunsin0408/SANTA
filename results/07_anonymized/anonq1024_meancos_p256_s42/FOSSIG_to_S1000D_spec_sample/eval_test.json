@@ -1,0 +1,5 @@
+{
+  "eval_mrr": 0.2748886869187621,
+  "trec_save_path": "/workspace/t2xml/santa/runs/retrieve/anonq1024_meancos_p256_s42/FOSSIG_to_S1000D_spec_sample/test_inference.trec",
+  "qrels_path": "/workspace/t2xml/retrieval_anonq/S1000D_spec_sample/qrels.test.tsv"
+}

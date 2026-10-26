@@ -1,0 +1,7 @@
+{
+  "best_checkpoint": "/workspace/t2xml/santa/runs/finetune/anonq1024_longpretrain10_s42/FOSSIG_to_S1000D_spec_sample/checkpoints",
+  "best_dev_mrr": 0.9404761904761906,
+  "per_checkpoint": {
+    "/workspace/t2xml/santa/runs/finetune/anonq1024_longpretrain10_s42/FOSSIG_to_S1000D_spec_sample/checkpoints": 0.9404761904761906
+  }
+}

@@ -1,0 +1,7 @@
+{"kind": "train", "step": 1, "epoch": 1.0, "loss": 9.2684, "learning_rate": 5e-05}
+{"kind": "train", "step": 2, "epoch": 2.0, "loss": 9.4176, "learning_rate": 3.7500000000000003e-05}
+{"kind": "train", "step": 3, "epoch": 3.0, "loss": 7.7306, "learning_rate": 2.5e-05}
+{"kind": "train", "step": 4, "epoch": 4.0, "loss": 6.8899, "learning_rate": 1.25e-05}
+{"kind": "train", "step": 5, "epoch": 5.0, "loss": 6.4038, "learning_rate": 0.0}
+{"kind": "eval", "step": 5, "epoch": 5.0, "eval_loss": 4.802751541137695}
+{"kind": "summary", "step": 5, "epoch": 5.0, "train_loss": 7.9420818328857425}

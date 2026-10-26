@@ -1,0 +1,5 @@
+{
+  "eval_mrr": 0.17385015286939212,
+  "trec_save_path": "/workspace/t2xml/santa/runs/retrieve/zeroshot_untrained_retrieval/codet5-base/test_inference.trec",
+  "qrels_path": "/workspace/t2xml/retrieval/S1000D_spec_sample/qrels.test.tsv"
+}
