@@ -11,9 +11,9 @@ branched from `master`. `master` holds the shared code, the XML data, the demo a
 | `exp/04-pool-size` | Widened 332-document candidate pool |
 | `exp/05-pretrain-diagnosis` | MEP ablation, pretrain epoch sweep |
 | `exp/06-same-domain` | Pretrain and finetune on two halves of S1000D_spec_sample |
-| `exp/08-anonymized` | Anonymized-query version of every S1000D experiment |
-| `exp/09-pooled` | Pooled 508-doc split, Poincare similarity, tau sweep, ss25 / q160 variants |
-| `exp/10-advtest` | CodeSearchNet AdvTest with the Poincare recipe; zero-shot from S1000D checkpoints |
+| `exp/07-anonymized` | Anonymized-query version of every S1000D experiment |
+| `exp/08-pooled` | Pooled 508-doc split, Poincare similarity, tau sweep, ss25 / q160 variants |
+| `exp/09-advtest` | CodeSearchNet AdvTest with the Poincare recipe; zero-shot from S1000D checkpoints |
 
 On `master`:
 

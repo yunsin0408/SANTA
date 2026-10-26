@@ -11,7 +11,7 @@ if [ "$MODE" = orig ]; then
   TAG=meponly_s42; DATA_ROOT=data_cnt; export RESULTS_ROOT=$SANTA/results/05_pretrain_diagnosis
   unset RETRIEVAL_ROOT
 else
-  TAG=anonq1024_meponly_s42; DATA_ROOT=data_anonq1024; export RESULTS_ROOT=$SANTA/results/08_anonymized
+  TAG=anonq1024_meponly_s42; DATA_ROOT=data_anonq1024; export RESULTS_ROOT=$SANTA/results/07_anonymized
   export RETRIEVAL_ROOT=$SANTA/data/xml/retrieval_anonq
 fi
 export PRETRAIN_EXTRA_ARGS="--use_contrastive False"

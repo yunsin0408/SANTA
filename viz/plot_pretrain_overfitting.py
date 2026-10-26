@@ -49,7 +49,7 @@ SHEETS = {
     },
     "Anonymized queries": {
         "tag": lambda ep: f"anonq1024_longpretrain{ep}_s42",
-        "results": REPO / "results" / "08_anonymized",
+        "results": REPO / "results" / "07_anonymized",
         "rows": {5: "anonq1024_longpretrain5_s42", 6: "anonq1024_longpretrain10_s42",
                  7: "anonq1024_longpretrain30_s42", 8: "anonq1024_longpretrain50_s42",
                  9: "anonq1024_meancos_p1024_s42", 10: "anonq1024_longpretrain100_s42"},

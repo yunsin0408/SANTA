@@ -31,7 +31,7 @@ import torch
 from matplotlib.lines import Line2D
 
 REPO = Path(__file__).resolve().parents[1]
-RES = REPO / "results" / "09_pooled_poincare"
+RES = REPO / "results" / "08_pooled_poincare"
 OUT = REPO / "results" / "figures"
 SCALE = 0.25  # --poincare_scale used by run_pooled.sh
 EPS = 1e-5    # model.py POINCARE_EPS

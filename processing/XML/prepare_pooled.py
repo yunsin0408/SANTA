@@ -28,7 +28,7 @@ for suffix in ("", "_anonq"):
         "pretrainB_finetuneA": (P / "halfB" / SLUG, R / "halfA" / SLUG),
         "finetuneB_only": (None, R / "halfB" / SLUG),
         "finetuneA_only": (None, R / "halfA" / SLUG),
-        "pretrain_full": (P / SLUG, R / SLUG),  # pretrain-only arms (experiments/09_pooled/run_pooled_pretrainonly.sh); finetune files unused
+        "pretrain_full": (P / SLUG, R / SLUG),  # pretrain-only arms (experiments/08_pooled/run_pooled_pretrainonly.sh); finetune files unused
     }
     for name, (pretrain_dir, retrieval_dir) in arms.items():
         out_dir = out / name

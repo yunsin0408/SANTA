@@ -1,10 +1,10 @@
 #!/bin/bash
 # Usage: GPU=<n> SEED=<s> bash experiments/demo/run_demo_model.sh
 # Rebuilds the model served by demo/ (search demo for outside testers): the pretrainonly_sdamep arm of
-# experiments/09_pooled/run_pooled_pretrainonly.sh with SIMILARITY=poincare on anonymized queries (pretrain on all 388 train docs,
+# experiments/08_pooled/run_pooled_pretrainonly.sh with SIMILARITY=poincare on anonymized queries (pretrain on all 388 train docs,
 # SDA+MEP, no finetuning, final checkpoint), seed 42 by default. Same settings as that launcher, but the checkpoint
 # is KEPT at runs/xml/pretrain/demo/<tag>/checkpoints. Re-evaluates on the 100-doc test split so the result can be
-# compared with results/09_pooled_poincare/pooled_anonq_poincare_s<seed>/pretrainonly_sdamep/eval_test.json.
+# compared with results/08_pooled_poincare/pooled_anonq_poincare_s<seed>/pretrainonly_sdamep/eval_test.json.
 SANTA="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$SANTA"
 seed=${SEED:-42}; tag=anonq_poincare_sdamep_s$seed
