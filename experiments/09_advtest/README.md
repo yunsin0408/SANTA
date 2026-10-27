@@ -1,4 +1,4 @@
-### AdvTest with the Poincare recipe
+### AdvTest with Poincare
 
 Launcher: [`run.sh`](run.sh) ([`run_advtest_poincare.sh`](run_advtest_poincare.sh)). Results: [`results/09_advtest/`](../../results/09_advtest/).
 
@@ -12,7 +12,7 @@ q/p/l max length 50/240/35, pretrain 10 epochs at lr 5e-5, finetune 12 epochs at
 AdvTest valid MRR (`data/xml/retrieval_advtest/`, built by `processing/XML/datasets/build_advtest_retrieval.py`); test is AdvTest test,
 19,210 queries x 19,210 functions.
 
-Needs the code track's data first (gitignored): `data/AdvTest/` (download in `PIPELINE.md`) and `data/processed/code/python/`
+Needs the code track's data: `data/AdvTest/` (download in `PIPELINE.md`) and `data/processed/code/python/`
 (`shell/process-pretrain-code.sh python`, `shell/process-finetune-code.sh python`).
 
 | Model (AdvTest test MRR) | Pretrain only | Pretrain + finetune |
