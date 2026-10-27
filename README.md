@@ -2,6 +2,62 @@
 
 Source code and dataset for ACL 2023 Structure-Aware Language Model Pretraining Improves Dense Retrieval on Structured Data.
 
+This fork has two tracks that share the same model code (`model.py`, `train_santa.py`, `trainer.py`):
+
+- **Code and product retrieval** -- SANTA's setup, reproducing CodeSearchNet / AdvTest, ESCI. Instructions
+  start at [Environment](#environment) below; [`PIPELINE.md`](PIPELINE.md) is the step-by-step run order and
+  [`MODIFICATIONS.md`](MODIFICATIONS.md) lists the changes made to the upstream code.
+- **S1000D XML retrieval** -- SANTA applied to S1000D technical documentation. Shared code and data are on
+  `master`; each experiment is on its own `exp/NN-*` branch. Setup and layout: [`XML.md`](XML.md).
+
+## XML experiments
+
+Each branch adds `experiments/NN_*/` (a `run.sh` that rebuilds the experiment's results, its launchers and a `README.md` write-up) and
+`results/NN_*/` (result JSONs) on top of `master`. Test MRR throughout; GPU training is not bit-exact, so reruns can move single cells by
+a few hundredths.
+
+| Branch | Write-up | Experiment | Main finding |
+| --- | --- | --- | --- |
+| `exp/01-baselines` | [README](https://github.com/yunsin0408/SANTA/blob/exp/01-baselines/experiments/01_baselines/README.md) | T5 vs. CodeT5, `p_max_len` 256 vs. 1024, cross-folder pairs | Everything at chance: first-token pooling gives every document nearly the same vector |
+| `exp/02-pooling-fix` | [README](https://github.com/yunsin0408/SANTA/blob/exp/02-pooling-fix/experiments/02_pooling_fix/README.md) | Mean pooling + cosine ("config A") | Lifts S1000D test MRR from chance to ~0.92, but no pretraining (0.94) is just as good |
+| `exp/03-query-leakage` | [README](https://github.com/yunsin0408/SANTA/blob/exp/03-query-leakage/experiments/03_query_leakage/README.md) | Queries rewritten without copied identifiers | BM25 still scores 0.98; dense drops to ~0.86, still no pretraining benefit |
+| `exp/04-pool-size` | [README](https://github.com/yunsin0408/SANTA/blob/exp/04-pool-size/experiments/04_pool_size/README.md) | Search all 332 S1000D documents instead of 21 | BM25 collapses to 0.13; dense 0.66 / 0.50 (original / anonymized), still no pretraining benefit |
+| `exp/05-ablation-study` | [README](https://github.com/yunsin0408/SANTA/blob/exp/05-ablation-study/experiments/05_ablation_study/README.md) | SDA vs. MEP pretraining loss; pretrain epoch sweep 5-100 | Neither loss alone explains it; longer pretraining overfits (best at 10-30 epochs) |
+| `exp/06-same-domain` | [README](https://github.com/yunsin0408/SANTA/blob/exp/06-same-domain/experiments/06_same_domain/README.md) | Pretrain and finetune on two halves of S1000D_spec_sample | Pretraining helps the harder half (+0.06 to +0.13) |
+| `exp/07-anonymized` | [README](https://github.com/yunsin0408/SANTA/blob/exp/07-anonymized/experiments/07_anonymized/README.md) | Exps 01-06 rerun on the anonymized queries | 01-05 replicate; exp 06's same-domain gain does not |
+| `exp/08-pooled` | [README](https://github.com/yunsin0408/SANTA/blob/exp/08-pooled/experiments/08_pooled/README.md) | All four folders pooled into one split (388 / 20 / 100 documents); Poincare similarity | Same-domain pretraining helps a lot (+0.24 to +0.38); Poincare similarity is the best setting |
+| `exp/09-advtest` | [README](https://github.com/yunsin0408/SANTA/blob/exp/09-advtest/experiments/09_advtest/README.md) | The exp 08 Poincare recipe on CodeSearchNet -> AdvTest | Doesn't transfer to code: 0.34 vs. 0.43 for the paper's recipe |
+
+To run: `git switch exp/NN-*`, then `bash experiments/NN_*/run.sh [GPU]` 
+
+### XML data
+
+How the
+datasets are built: [`processing/XML/datasets/README.md`](processing/XML/datasets/README.md).
+
+| Folder | Contents | Used by |
+| --- | --- | --- |
+| `pretrain/` | SDA + MEP pretraining pairs per folder (BIKE_7, FOSSIG, S1000D_spec_sample, s1kd-tools-doc), original LLM descriptions | 01-07 (pretraining; S1000D pretrain-dev) |
+| `retrieval/` | Retrieval benchmark per folder (corpus / queries / qrels), original queries; S1000D_spec_sample also has the 332-document pool (`*.all332.*`) | 01, 02, 04, 05, 06 (finetuning and test); 07 (untrained zero-shot baseline) |
+| `pretrain_anonq/` | Anonymized SDA descriptions for S1000D_spec_sample, the source of `retrieval_anonq/` | 03, 07 |
+| `retrieval_anonq/` | S1000D_spec_sample benchmark with anonymized queries, incl. the 332-document pool | 03, 04, 07 |
+| `pretrain_samedomain{,_alt}/`, `retrieval_samedomain{,_alt}/` | S1000D_spec_sample's train documents split into halves A / B (original and alternate split) | 06 |
+| `pretrain_samedomain{,_alt}_anonq/`, `retrieval_samedomain{,_alt}_anonq/`, `pretrain_samedomain_anonq_src/` | The same halves with anonymized queries (`_src`: intermediate input of `build_samedomain_split_anonq.py`) | 07 |
+| `pretrain_pooled{,_anonq}/`, `retrieval_pooled{,_anonq}/` | All four folders pooled, 388 / 20 / 100 documents, halves A / B, original and anonymized queries | 08; the demo (`pretrain_pooled_anonq`, `retrieval_pooled_anonq`) |
+| `queries_pooled_taskq/` | Task-style queries for the pooled split (`generate_task_queries.py`) | none yet |
+| `retrieval_advtest/` (gitignored) | AdvTest valid / test in the XML retrieval format (`build_advtest_retrieval.py`) | 09 |
+
+Tokenized inputs (`data/xml/tokenized/`, gitignored, built by the `processing/XML/prepare_*.py` scripts):
+
+| Folder | Used by |
+| --- | --- |
+| `data_t5`, `data_codet5`, `data_cnt` | 01 (`data_cnt` also 02, 04, 05) |
+| `data_long` | 02 |
+| `data_anonq` | 03, 04 |
+| `data_samedomain{,_alt}` | 06 |
+| `data_anonq1024`, `data_anonq_t5`, `data_samedomain{,_alt}_anonq` | 07 |
+| `data_pooled{,_anonq}` | 08; the demo |
+
 ## Environment
 (1) Install the following packages using Pip or Conda under this environment:
 ```
