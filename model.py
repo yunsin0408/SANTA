@@ -36,6 +36,15 @@ def poincare_scores(q: Tensor, p: Tensor, eps: float = POINCARE_EPS) -> Tensor:
     return -torch.acosh((1 + 2 * sqdist / denom).clamp(min=1 + 1e-7))
 
 
+def lorentz_scores(q: Tensor, p: Tensor) -> Tensor:
+    """Negative Lorentz (hyperboloid) distance (curvature -1) between all pairs of points on the hyperboloid:
+    q (nq, d+1), p (np, d+1) -> (nq, np). Needs float64 and no autocast: -<q,p>_L is a difference of two
+    nearly equal products, which bf16 (the training precision) would round away."""
+    with torch.autocast(device_type=q.device.type, enabled=False):
+        inner = q[:, 0:1] @ p[:, 0:1].transpose(0, 1) - q[:, 1:] @ p[:, 1:].transpose(0, 1)
+        return -torch.acosh(inner.clamp(min=1 + 1e-7))
+
+
 @dataclass
 class DROutput(ModelOutput):
     q_reps: Tensor = None
@@ -62,6 +71,7 @@ class SModel(nn.Module):
             normalize: bool = False,
             similarity: str = "dot",
             poincare_scale: float = 0.25,
+            lorentz_scale: float = 0.5,
             model_args: ModelArguments = None,
             data_args: DataArguments = None,
             train_args: TrainingArguments = None,
@@ -71,8 +81,11 @@ class SModel(nn.Module):
 
         if santa_args is not None and not santa_args.use_contrastive and not santa_args.use_generate:
             raise ValueError("--use_contrastive False needs --use_generate True: with both losses off there is nothing to train ")
-        if similarity not in ("dot", "poincare"):
+        if similarity not in ("dot", "poincare", "lorentz"):
             raise ValueError(f"unknown similarity {similarity!r}")
+        if similarity == "lorentz" and normalize:
+            raise ValueError("--similarity lorentz needs --normalize False: unit-norm reps all land on one sphere on the "
+                             "hyperboloid, where Lorentz distance is a monotone function of cosine.")
         if similarity == "poincare" and normalize:
             raise ValueError("--similarity poincare needs --normalize False: unit-norm reps all land on one sphere in the "
                              "ball, where Poincare distance is a monotone function of cosine.")
@@ -92,6 +105,7 @@ class SModel(nn.Module):
         self.normalize = normalize
         self.similarity = similarity
         self.poincare_scale = poincare_scale
+        self.lorentz_scale = lorentz_scale
 
         self.model_args = model_args
         self.train_args = train_args
@@ -118,6 +132,7 @@ class SModel(nn.Module):
             "normalize": self.normalize,
             "similarity": self.similarity,
             "poincare_scale": self.poincare_scale,
+            "lorentz_scale": self.lorentz_scale,
         }
         return config
 
@@ -127,11 +142,19 @@ class SModel(nn.Module):
         norm = x.norm(dim=-1, keepdim=True).clamp(min=POINCARE_EPS)
         return torch.tanh(norm) * x / norm
 
+    def to_hyperboloid(self, reps: Tensor) -> Tensor:
+        """Exponential map at the origin of the hyperboloid: (d) -> (d+1), hyperbolic radius |reps| * lorentz_scale."""
+        x = reps.double() * self.lorentz_scale
+        norm = x.norm(dim=-1, keepdim=True).clamp(min=POINCARE_EPS)
+        return torch.cat([torch.cosh(norm), torch.sinh(norm) * x / norm], dim=-1)
+
     def score(self, q_reps: Tensor, p_reps: Tensor) -> Tensor:
         """Similarity matrix, shared by training and evaluation. q_reps / p_reps are
         already normalized when self.normalize is set."""
         if self.similarity == "poincare":
             return poincare_scores(self.to_ball(q_reps), self.to_ball(p_reps))
+        if self.similarity == "lorentz":
+            return lorentz_scores(self.to_hyperboloid(q_reps), self.to_hyperboloid(p_reps)).float()
         return torch.matmul(q_reps, p_reps.transpose(0, 1))
 
     def forward(
@@ -317,6 +340,8 @@ class SModel(nn.Module):
             else config.get("similarity", "dot"),
             poincare_scale=(santa_args.poincare_scale if santa_args is not None else 0.25) if config is None
             else config.get("poincare_scale", 0.25),
+            lorentz_scale=(santa_args.lorentz_scale if santa_args is not None else 0.5) if config is None
+            else config.get("lorentz_scale", 0.5),
             model_args=model_args,
             data_args=data_args,
             train_args=train_args,

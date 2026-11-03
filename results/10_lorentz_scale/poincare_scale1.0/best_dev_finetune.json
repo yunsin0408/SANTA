@@ -1,0 +1,7 @@
+{
+  "best_checkpoint": "/workspace/SANTA_v2/runs/xml/finetune/poincare_scale1.0/full/checkpoints",
+  "best_dev_mrr": 0.36474386724386726,
+  "per_checkpoint": {
+    "/workspace/SANTA_v2/runs/xml/finetune/poincare_scale1.0/full/checkpoints": 0.36474386724386726
+  }
+}

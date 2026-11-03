@@ -1,0 +1,5 @@
+{
+  "eval_mrr": 0.7053584471084471,
+  "trec_save_path": "/workspace/SANTA_v2/runs/xml/retrieve/pooled_anonq_lorentz_s2/pretrainA_finetuneB/test_inference.trec",
+  "qrels_path": "/workspace/SANTA_v2/data/xml/retrieval_pooled_anonq/pooled/qrels.test.tsv"
+}

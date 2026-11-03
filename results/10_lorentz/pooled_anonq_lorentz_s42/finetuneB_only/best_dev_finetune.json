@@ -1,0 +1,7 @@
+{
+  "best_checkpoint": "/workspace/SANTA_v2/runs/xml/finetune/pooled_anonq_lorentz_s42/finetuneB_only/checkpoints",
+  "best_dev_mrr": 0.5249621212121213,
+  "per_checkpoint": {
+    "/workspace/SANTA_v2/runs/xml/finetune/pooled_anonq_lorentz_s42/finetuneB_only/checkpoints": 0.5249621212121213
+  }
+}

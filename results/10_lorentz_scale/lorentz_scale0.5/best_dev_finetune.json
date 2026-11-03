@@ -1,0 +1,7 @@
+{
+  "best_checkpoint": "/workspace/SANTA_v2/runs/xml/finetune/lorentz_scale0.5/full/checkpoints",
+  "best_dev_mrr": 0.8916666666666666,
+  "per_checkpoint": {
+    "/workspace/SANTA_v2/runs/xml/finetune/lorentz_scale0.5/full/checkpoints": 0.8916666666666666
+  }
+}

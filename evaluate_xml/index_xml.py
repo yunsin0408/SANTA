@@ -54,9 +54,9 @@ def encode_all(model, tokenizer, texts, max_len, batch_size, device, is_query):
 
 def search(model, query_embs, corpus_embs, topk):
     """Exact top-k search -> (scores, indices) numpy arrays of shape (nq, topk). Dot-product models use
-    faiss IndexFlatIP (inner product, as in training); Poincare models (no faiss index for hyperbolic
+    faiss IndexFlatIP (inner product, as in training); Poincare and Lorentz models (no faiss index for hyperbolic
     distance) score every pair with model.score, the same function the training loss uses."""
-    if getattr(model, "similarity", "dot") == "poincare":
+    if getattr(model, "similarity", "dot") in ("poincare", "lorentz"):
         with torch.no_grad():
             scores = model.score(query_embs.float(), corpus_embs.float())
         top_scores, top_indices = scores.topk(topk, dim=1)
