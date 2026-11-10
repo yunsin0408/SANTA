@@ -1,0 +1,10 @@
+{
+  "best_checkpoint": "/workspace/SANTA_v2/runs/xml/advtest/mean_p256_b128/finetune/checkpoints/checkpoint-22000",
+  "best_dev_mrr": 0.47422719471794184,
+  "per_checkpoint": {
+    "/workspace/SANTA_v2/runs/xml/advtest/mean_p256_b128/finetune/checkpoints": 0.47374587474926616,
+    "/workspace/SANTA_v2/runs/xml/advtest/mean_p256_b128/finetune/checkpoints/checkpoint-21000": 0.4722898769341254,
+    "/workspace/SANTA_v2/runs/xml/advtest/mean_p256_b128/finetune/checkpoints/checkpoint-22000": 0.47422719471794184,
+    "/workspace/SANTA_v2/runs/xml/advtest/mean_p256_b128/finetune/checkpoints/checkpoint-23000": 0.4730720576616193
+  }
+}

@@ -20,6 +20,7 @@ def main():
     parser = ArgumentParser()
     parser.add_argument('--input', type=str, default=None)
     parser.add_argument('--output', type=str, default=None)
+    parser.add_argument('--max_len', type=int, default=256, help='code token truncation length')
     args = parser.parse_args()
     tokenizer = RobertaTokenizer.from_pretrained('Salesforce/codet5-base')
     data=load_data(args.input)
@@ -39,7 +40,7 @@ def main():
             positives = []
 
             positives.append(code)
-            positives = tokenizer(positives, add_special_tokens=False, max_length=256, truncation=True, padding=False)['input_ids']
+            positives = tokenizer(positives, add_special_tokens=False, max_length=args.max_len, truncation=True, padding=False)['input_ids']
             query = tokenizer.encode(nl, add_special_tokens=False, max_length=50, truncation=True)
             n=tokenizer.convert_ids_to_tokens(query)
             p=tokenizer.convert_ids_to_tokens(positives[0])

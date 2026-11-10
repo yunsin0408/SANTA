@@ -1,0 +1,5 @@
+{
+  "eval_mrr": 0.39712602571480116,
+  "trec_save_path": "/workspace/SANTA_v2/runs/xml/advtest/mean_p256_b128/retrieve/test_inference_pretrain.trec",
+  "qrels_path": "/workspace/SANTA_v2/data/xml/retrieval_advtest/advtest/qrels.test.tsv"
+}

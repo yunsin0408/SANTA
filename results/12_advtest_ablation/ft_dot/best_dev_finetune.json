@@ -1,0 +1,10 @@
+{
+  "best_checkpoint": "/workspace/SANTA_v2/runs/xml/advtest/ft_dot/finetune/checkpoints",
+  "best_dev_mrr": 0.5584376467974159,
+  "per_checkpoint": {
+    "/workspace/SANTA_v2/runs/xml/advtest/ft_dot/finetune/checkpoints": 0.5584376467974159,
+    "/workspace/SANTA_v2/runs/xml/advtest/ft_dot/finetune/checkpoints/checkpoint-21000": 0.557595090925227,
+    "/workspace/SANTA_v2/runs/xml/advtest/ft_dot/finetune/checkpoints/checkpoint-22000": 0.5577315590209031,
+    "/workspace/SANTA_v2/runs/xml/advtest/ft_dot/finetune/checkpoints/checkpoint-23000": 0.5578050682659452
+  }
+}

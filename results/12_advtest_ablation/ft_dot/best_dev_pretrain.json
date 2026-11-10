@@ -1,0 +1,10 @@
+{
+  "best_checkpoint": "/workspace/SANTA_v2/runs/xml/advtest/ft_dot/pretrain/checkpoints/checkpoint-32000",
+  "best_dev_mrr": 0.4621082066974689,
+  "per_checkpoint": {
+    "/workspace/SANTA_v2/runs/xml/advtest/ft_dot/pretrain/checkpoints": 0.46091794203935477,
+    "/workspace/SANTA_v2/runs/xml/advtest/ft_dot/pretrain/checkpoints/checkpoint-31000": 0.4607712393240166,
+    "/workspace/SANTA_v2/runs/xml/advtest/ft_dot/pretrain/checkpoints/checkpoint-32000": 0.4621082066974689,
+    "/workspace/SANTA_v2/runs/xml/advtest/ft_dot/pretrain/checkpoints/checkpoint-33000": 0.4605552705766353
+  }
+}

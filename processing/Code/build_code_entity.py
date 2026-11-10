@@ -215,6 +215,7 @@ def main():
     parser.add_argument('--output', type=str, default=None)
     parser.add_argument('--tree', type=str, default=None)
     parser.add_argument('--random_seed', type=int, default=42)
+    parser.add_argument('--max_len', type=int, default=240, help='code token truncation length')
     parser.add_argument('--code_type', type=str, default=None)
 
 
@@ -330,7 +331,7 @@ def main():
             group = {}
             positives = []
             positives.append(positive)
-            positives = tokenizer(positives, add_special_tokens=False, max_length=240, truncation=True, padding=False)[
+            positives = tokenizer(positives, add_special_tokens=False, max_length=args.max_len, truncation=True, padding=False)[
                 'input_ids']
             query = tokenizer.encode(nl, add_special_tokens=False, max_length=60, truncation=True)
             labels = tokenizer(labels, add_special_tokens=False, max_length=60, truncation=True, padding=False)[
