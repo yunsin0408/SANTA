@@ -1,0 +1,5 @@
+{
+  "eval_mrr": 0.0981794845664468,
+  "trec_save_path": "/workspace/SANTA_v2/runs/xml/advtest/advtest_firsttoken_poincare_s42/retrieve/test_inference.trec",
+  "qrels_path": "/workspace/SANTA_v2/data/xml/retrieval_advtest/advtest/qrels.test.tsv"
+}

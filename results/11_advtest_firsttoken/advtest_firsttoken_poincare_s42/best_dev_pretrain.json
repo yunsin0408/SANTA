@@ -1,0 +1,10 @@
+{
+  "best_checkpoint": "/workspace/SANTA_v2/runs/xml/advtest/advtest_firsttoken_poincare_s42/pretrain/checkpoints/checkpoint-31000",
+  "best_dev_mrr": 0.11671805176977175,
+  "per_checkpoint": {
+    "/workspace/SANTA_v2/runs/xml/advtest/advtest_firsttoken_poincare_s42/pretrain/checkpoints": 0.11548773769512878,
+    "/workspace/SANTA_v2/runs/xml/advtest/advtest_firsttoken_poincare_s42/pretrain/checkpoints/checkpoint-31000": 0.11671805176977175,
+    "/workspace/SANTA_v2/runs/xml/advtest/advtest_firsttoken_poincare_s42/pretrain/checkpoints/checkpoint-32000": 0.11528393145857166,
+    "/workspace/SANTA_v2/runs/xml/advtest/advtest_firsttoken_poincare_s42/pretrain/checkpoints/checkpoint-33000": 0.11591572408574223
+  }
+}
